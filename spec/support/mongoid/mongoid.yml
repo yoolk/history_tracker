@@ -1,0 +1,8 @@
+test:
+  sessions:
+    default:
+      database: active_audit
+      hosts:
+        - localhost:27017
+      options:
+        safe: true
