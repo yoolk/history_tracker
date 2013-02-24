@@ -15,7 +15,7 @@ RSpec.configure do |config|
 
   # Clean/Reset Mongoid DB prior to running the tests
   config.before :each do
-    Mongoid.default_session.collections.select {|c| c.name !~ /system/ }.each(&:drop)
+    Mongoid.default_session.drop
   end
 end
 
