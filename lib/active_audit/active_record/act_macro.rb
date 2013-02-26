@@ -28,8 +28,12 @@ module ActiveAudit
 
           klass = self.const_get(:Audit) rescue nil
           if klass.nil? || klass.class_name != (self.class_name + 'Audit')
-            klass = self.const_set(:Audit, Class.new(ActiveAudit::Mongoid::Audit))
-            klass.store_in collection: klass.name.gsub('::', '_').tableize
+            collection_name = "#{self.name}::Audit".gsub('::', '_').tableize
+            klass = Class.new do
+              include ActiveAudit::Mongoid::AuditTrail
+              store_in collection: collection_name
+            end
+            klass = self.const_set(:Audit, klass)
           end
 
           self.audit_class = klass
