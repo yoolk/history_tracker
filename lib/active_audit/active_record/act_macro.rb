@@ -7,6 +7,7 @@ module ActiveAudit
         def audit_trail(options = {})
           return if audit?
           
+          options[:scope] ||= self.name.underscore.to_sym
           setup_audit_trail!(options)
 
           extend ActiveAudit::ActiveRecord::ClassMethods
@@ -16,14 +17,21 @@ module ActiveAudit
         def audit?
           self.included_modules.include?(ActiveAudit::ActiveRecord::InstanceMethods)
         end
-        
+
         private
         def setup_audit_trail!(options)
-          setup_audit_class!(options)
-          setup_audit_column!(options)
+          audit_options!(options)
+          audit_class!(options)
+          audit_column!(options)
+          audit_callback!(options)
         end
 
-        def setup_audit_class!(options)
+        def audit_options!(options)
+          class_attribute :audit_options, instance_writer: false
+          self.audit_options = options
+        end
+
+        def audit_class!(options)
           class_attribute :audit_class, instance_writer: false
 
           klass = self.const_get(:Audit) rescue nil
@@ -39,7 +47,7 @@ module ActiveAudit
           self.audit_class = klass
         end
 
-        def setup_audit_column!(options)
+        def audit_column!(options)
           class_attribute :audited_columns, instance_writer: false
           class_attribute :non_audited_columns, instance_writer: false
 
@@ -51,6 +59,12 @@ module ActiveAudit
           end
           self.non_audited_columns = except
           self.audited_columns = column_names - except
+        end
+
+        def audit_callback!(options)
+          after_create   :audit_create   if !options[:on] || (options[:on] && options[:on].include?(:create))
+          before_update  :audit_update   if !options[:on] || (options[:on] && options[:on].include?(:update))
+          before_destroy :audit_destroy  if !options[:on] || (options[:on] && options[:on].include?(:destroy))
         end
       end
     end
