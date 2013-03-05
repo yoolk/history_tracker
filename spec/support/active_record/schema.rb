@@ -13,4 +13,12 @@ ActiveRecord::Schema.define do
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
   end
+
+  create_table :comments, :force => true do |t|
+    t.column :title, :string
+    t.column :body, :string
+    t.column :book_id, :integer
+    t.column :created_at, :datetime
+    t.column :updated_at, :datetime
+  end
 end

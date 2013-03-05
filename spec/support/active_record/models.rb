@@ -1,5 +1,11 @@
 class Book < ActiveRecord::Base
+  has_many :comments, :dependent => :destroy
   audit_trail
+end
+
+class Comment < ActiveRecord::Base
+  belongs_to :book
+  audit_trail scope: :book
 end
 
 class BookClassName < ActiveRecord::Base
