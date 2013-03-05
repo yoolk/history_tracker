@@ -52,7 +52,7 @@ module ActiveAudit
       end
 
       def audited_attributes_for_update
-        changes
+        changes.except(*non_audited_columns)
       end
 
       def audited_attributes_for_destroy

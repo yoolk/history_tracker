@@ -6,9 +6,12 @@ module ActiveAudit
       module ClassMethods
         def audit_trail(options = {})
           return if audit?
-          
+
           options[:scope] ||= self.name.underscore.to_sym
-          setup_audit_trail!(options)
+          class_attribute :audit_options, instance_writer: false
+          self.audit_options = options
+
+          setup_audit_trail!
 
           extend ActiveAudit::ActiveRecord::ClassMethods
           include ActiveAudit::ActiveRecord::InstanceMethods
@@ -19,19 +22,13 @@ module ActiveAudit
         end
 
         private
-        def setup_audit_trail!(options)
-          audit_options!(options)
-          audit_class!(options)
-          audit_column!(options)
-          audit_callback!(options)
+        def setup_audit_trail!
+          audit_class!
+          audit_column!
+          audit_callback!
         end
 
-        def audit_options!(options)
-          class_attribute :audit_options, instance_writer: false
-          self.audit_options = options
-        end
-
-        def audit_class!(options)
+        def audit_class!
           class_attribute :audit_class, instance_writer: false
 
           klass = self.const_get(:Audit) rescue nil
@@ -47,24 +44,24 @@ module ActiveAudit
           self.audit_class = klass
         end
 
-        def audit_column!(options)
+        def audit_column!
           class_attribute :audited_columns, instance_writer: false
           class_attribute :non_audited_columns, instance_writer: false
 
-          if options[:only]
-            except = column_names - options[:only].flatten.map(&:to_s)
+          if audit_options[:only]
+            except = column_names - audit_options[:only].flatten.map(&:to_s)
           else
             except = ActiveAudit.ignored_attributes
-            except |= Array(options[:except]).collect(&:to_s) if options[:except]
+            except |= Array(audit_options[:except]).collect(&:to_s) if audit_options[:except]
           end
           self.non_audited_columns = except
           self.audited_columns = column_names - except
         end
 
-        def audit_callback!(options)
-          after_create   :audit_create   if !options[:on] || (options[:on] && options[:on].include?(:create))
-          before_update  :audit_update   if !options[:on] || (options[:on] && options[:on].include?(:update))
-          before_destroy :audit_destroy  if !options[:on] || (options[:on] && options[:on].include?(:destroy))
+        def audit_callback!
+          after_create   :audit_create   if !audit_options[:on] || (audit_options[:on] && audit_options[:on].include?(:create))
+          before_update  :audit_update   if !audit_options[:on] || (audit_options[:on] && audit_options[:on].include?(:update))
+          before_destroy :audit_destroy  if !audit_options[:on] || (audit_options[:on] && audit_options[:on].include?(:destroy))
         end
       end
     end
