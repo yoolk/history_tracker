@@ -5,6 +5,10 @@ module ActiveAudit
         association_chain = [{ id: id, name: self.class.name }]
         audit_class.where(scope: audit_options[:scope], association_chain: association_chain)
       end
+      
+      def audit_class
+        self.class.audit_class
+      end
 
       private
       def transform_changes(changes)

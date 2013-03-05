@@ -21,6 +21,14 @@ describe 'Tracking changes when update' do
     audited.scope.should    == "book"
   end
 
+  it 'should track changes with :class_name' do
+    book = BookClassName.create!(name: 'MongoDB 101', read_count: 101)
+
+    expect {
+      book.update_attributes!(name: 'MongoDB 102', read_count: 102)
+    }.to change { BookHistory.count }.by(1)
+  end
+
   it 'should track changes with :only options' do
     book = BookOnly.create!(name: 'MongoDB 101', read_count: 101)
     book.update_attributes!(name: 'MongoDB 102', read_count: 102)

@@ -7,6 +7,7 @@ load File.dirname(__FILE__) + '/support/active_record/models.rb'
 
 # mongoid
 load File.dirname(__FILE__) + '/support/mongoid/connection.rb'
+load File.dirname(__FILE__) + '/support/mongoid/models.rb'
 
 RSpec.configure do |config|
   config.filter_run focus: true

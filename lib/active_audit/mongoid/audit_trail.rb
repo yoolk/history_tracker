@@ -13,7 +13,7 @@ module ActiveAudit
         field :original,          type: Hash,    default: {}
         field :version,           type: Integer
         field :action,            type: String
-        field :scope,             type: String
+        field :scope,             type: Array,   default: []
       end
     end
   end

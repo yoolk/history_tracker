@@ -21,6 +21,14 @@ describe 'Tracking changes when destroy' do
     audited.scope.should    == "book"
   end
 
+  it 'should track changes with :class_name' do
+    book = BookClassName.create!(name: 'MongoDB 101', read_count: 101)
+
+    expect {
+      book.destroy
+    }.to change { BookHistory.count }.by(1)
+  end
+
   it 'should track changes with :only options' do
     book = BookOnly.create!(name: 'MongoDB 101', read_count: 101)
     book.destroy
@@ -37,7 +45,7 @@ describe 'Tracking changes when destroy' do
     book.audited_changes.last.modified.should include({"id"=>book.id, "name"=>"MongoDB 101", "read_count"=>101})
   end
 
-  it 'should track change with on: [:update]' do
+  it 'should track change with on: [:destroy]' do
     book = BookOnDestroy.new(name: 'MongoDB 101', description: 'Open source document database', is_active: true, read_count: 5)
 
     expect { book.save }.to_not change { BookOnDestroy.audit_class.count }.by(1)

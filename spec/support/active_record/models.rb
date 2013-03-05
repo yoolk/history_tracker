@@ -2,6 +2,11 @@ class Book < ActiveRecord::Base
   audit_trail
 end
 
+class BookClassName < ActiveRecord::Base
+  self.table_name = :books
+  audit_trail class_name: 'BookHistory'
+end
+
 class BookOnly < ActiveRecord::Base
   self.table_name = :books
   audit_trail only: [:name]

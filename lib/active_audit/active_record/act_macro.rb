@@ -7,7 +7,7 @@ module ActiveAudit
         def audit_trail(options = {})
           return if audit?
 
-          options[:scope] ||= self.name.underscore.to_sym
+          options[:scope] ||= self.name.underscore
           class_attribute :audit_options, instance_writer: false
           self.audit_options = options
 
@@ -23,25 +23,8 @@ module ActiveAudit
 
         private
         def setup_audit_trail!
-          audit_class!
           audit_column!
           audit_callback!
-        end
-
-        def audit_class!
-          class_attribute :audit_class, instance_writer: false
-
-          klass = self.const_get(:Audit) rescue nil
-          if klass.nil? || klass.class_name != (self.class_name + 'Audit')
-            collection_name = "#{self.name}::Audit".gsub('::', '_').tableize
-            klass = Class.new do
-              include ActiveAudit::Mongoid::AuditTrail
-              store_in collection: collection_name
-            end
-            klass = self.const_set(:Audit, klass)
-          end
-
-          self.audit_class = klass
         end
 
         def audit_column!

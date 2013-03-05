@@ -19,6 +19,10 @@ describe 'Audit class' do
     BookExcept.audit_class.collection_name.should == :book_except_audits
   end
 
+  it 'should use specified class_name for storing' do
+    BookClassName.audit_class.name.should == 'BookHistory'
+  end
+
   it 'returns audited columns' do
     Book.audited_columns.should == ["name", "description", "is_active", "read_count"]
   end
