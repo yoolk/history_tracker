@@ -2,7 +2,10 @@ module ActiveAudit
   module ActiveRecord
     module InstanceMethods
       def audited_changes
-        audit_class.where(scope: audit_options[:scope], association_chain: association_chain)
+        audit_class.where(
+          'association_chain'=> {'$all' => association_chain }, 
+          'scope' => audit_options[:scope]
+        )
       end
       
       def audit_class
@@ -13,11 +16,16 @@ module ActiveAudit
       def association_chain
         return @association_chain if @association_chain
 
-        @association_chain = [{ id: id, name: self.class.name }]
+        # relation: belongs_to
         if reflections[audit_options[:scope]].present?
-          association = send(audit_options[:scope])
-          reflection = reflections.find { |name, reflection| name == audit_options[:scope] }[1]
-          @association_chain << { id: association.id, name: reflection.name }
+          main = send(audit_options[:scope])
+          reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
+          @association_chain = [
+            { id: main.id, name: main.class.name },
+            { id: id, name: reflection.name.to_s }
+          ]
+        else
+          @association_chain = [{ id: id, name: self.class.name }]
         end
         @association_chain
       end
@@ -37,7 +45,7 @@ module ActiveAudit
       def audited_attributes(method)
         @audited_attributes = {
           association_chain: association_chain,
-          scope:             audit_options[:scope],
+          scope:             audit_options[:scope].to_s,
           action:            method,
           modifier_id:       ActiveAudit.current_modifier.id
         }
