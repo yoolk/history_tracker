@@ -23,6 +23,11 @@ class BookExcept < ActiveRecord::Base
   audit_trail except: [:name]
 end
 
+class BookExceptAll < ActiveRecord::Base
+  self.table_name = :books
+  audit_trail except: [:name, :description, :read_count, :is_active]
+end
+
 class BookOnCreate < ActiveRecord::Base
   self.table_name = :books
   audit_trail on: [:create]

@@ -94,6 +94,7 @@ module ActiveAudit
 
       def audit_update
         return unless track_history?
+        return if audited_attributes_for_update.blank?
         
         audit_class.create!(audited_attributes(:update))
       end

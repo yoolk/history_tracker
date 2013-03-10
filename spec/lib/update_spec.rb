@@ -46,6 +46,14 @@ describe 'Tracking changes when update' do
       book.audited_changes.last.modified.should == {"read_count"=>102}
     end
 
+    it 'should not track changes with :except, all columns' do
+      book = BookExceptAll.create!(name: 'MongoDB 101', read_count: 101)
+
+      expect {
+        book.update_attributes!(name: 'MongoDB 102', read_count: 102)
+      }.to change { BookExceptAll.audit_class.count }.by(0)
+    end
+
     it 'should track changes with on: [:update]' do
       book = BookOnUpdate.new(name: 'MongoDB 101', description: 'Open source document database', is_active: true, read_count: 5)
 
