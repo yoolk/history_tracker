@@ -56,15 +56,26 @@ describe 'Tracking changes when destroy' do
   end
 
   context "when disabled" do
+    before(:each) do
+      @book = Book.create!(name: 'MongoDB 101', read_count: 101)
+    end
+
     after(:each) do
       Book.enable_tracking
     end
     
     it "should not track" do
       Book.disable_tracking
-      book = BookExcept.create!(name: 'MongoDB 101', read_count: 101)
 
-      expect { book.destroy }.to change { Book.audit_class.count }.by(0)
+      expect { @book.destroy }.to change { Book.audit_class.count }.by(0)
+    end
+
+    it "should not track #without_tracking without :destroy" do
+      expect { @book.without_tracking { @book.destroy } }.to change { Book.audit_class.count }.by(0)
+    end
+
+    it "should not track #without_tracking with :destroy" do
+      expect { @book.without_tracking(:destroy) }.to change { Book.audit_class.count }.by(0)
     end
   end
 end

@@ -64,6 +64,10 @@ describe 'Tracking changes when update' do
   end
 
   context "when disabled" do
+    before(:each) do
+      @book = Book.create!(name: 'MongoDB 101', read_count: 101)
+    end
+
     after(:each) do
       Book.enable_tracking
     end
@@ -71,10 +75,19 @@ describe 'Tracking changes when update' do
     it "should not track changes" do
       Book.disable_tracking
 
-      book = Book.create!(name: 'MongoDB 101', read_count: 101)
       expect {
-        book.update_attributes!(name: 'MongoDB 102', read_count: 102)
+        @book.update_attributes!(name: 'MongoDB 102', read_count: 102)
       }.to change { Book.audit_class.count }.by(0)
+    end
+
+    it "should not track #without_tracking without :save" do
+      @book.name = 'MongoDB 102'
+      expect { @book.without_tracking { @book.save } }.to change { Book.audit_class.count }.by(0)
+    end
+
+    it "should not track #without_tracking with :save" do
+      @book.name = 'MongoDB 102'
+      expect { @book.without_tracking(:save) }.to change { Book.audit_class.count }.by(0)
     end
   end
 end

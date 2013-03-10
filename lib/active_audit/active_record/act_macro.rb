@@ -12,7 +12,7 @@ module ActiveAudit
           self.audit_options = options
 
           delegate :track_history?, :to => 'self.class'
-          class_attribute :track_history_per_model
+          class_attribute :track_history_per_model, instance_writer: false
           self.track_history_per_model = true
 
           setup_audit_trail!

@@ -12,6 +12,14 @@ module ActiveAudit
         self.class.audit_class
       end
 
+      def without_tracking(method = nil)
+        tracking_was_enabled = self.track_history_per_model
+        self.class.disable_tracking
+        method ? method.to_proc.call(self) : yield
+      ensure
+        self.class.enable_tracking if tracking_was_enabled
+      end
+
       private
       def association_chain
         return @association_chain if @association_chain

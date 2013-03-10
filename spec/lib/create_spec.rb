@@ -61,5 +61,15 @@ describe 'Tracking changes when create' do
         Book.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, read_count: 5)
       }.to change { Book.audit_class.count }.by(0)
     end
+
+    it "should not track #without_tracking without :save" do
+      book = Book.new(name: 'MongoDB 101')
+      expect { book.without_tracking { book.save! } }.to change { Book.audit_class.count }.by(0)
+    end
+
+    it "should not track #without_tracking with :save" do
+      book = Book.new(name: 'MongoDB 101')
+      expect { book.without_tracking(:save) }.to change { Book.audit_class.count }.by(0)
+    end
   end
 end
