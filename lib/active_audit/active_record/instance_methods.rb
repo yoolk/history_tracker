@@ -87,14 +87,20 @@ module ActiveAudit
       end
 
       def audit_create
+        return unless track_history?
+
         audit_class.create!(audited_attributes(:create))
       end
 
       def audit_update
+        return unless track_history?
+        
         audit_class.create!(audited_attributes(:update))
       end
 
       def audit_destroy
+        return unless track_history?
+
         audit_class.create!(audited_attributes(:destroy))
       end
     end

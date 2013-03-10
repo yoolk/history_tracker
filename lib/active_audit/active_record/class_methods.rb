@@ -23,6 +23,26 @@ module ActiveAudit
 
         @audit_class = klass
       end
+
+      def track_history?
+        track_history_per_model
+      end
+
+      def disable_tracking
+        self.track_history_per_model = false
+      end
+
+      def enable_tracking
+        self.track_history_per_model = true
+      end
+
+      def without_tracking
+        tracking_was_enabled = self.track_history_per_model
+        disable_tracking
+        yield
+      ensure
+        enable_tracking if tracking_was_enabled
+      end
     end
   end
 end
