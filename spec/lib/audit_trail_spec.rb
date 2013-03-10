@@ -42,4 +42,39 @@ describe 'Audit Log' do
       Book.track_history?.should be_true
     end
   end
+
+  context "Enable/Disable globally" do
+    after(:each) do
+      ActiveAudit.enabled = true
+      Book.enable_tracking
+    end
+
+    it 'should enable by default' do
+      ActiveAudit.enabled?.should be_true
+    end
+
+    it 'should disable tracking' do
+      ActiveAudit.enabled = false
+
+      ActiveAudit.enabled?.should be_false
+      Book.track_history?.should be_false
+    end
+
+    it 'should follow global setting' do
+      ActiveAudit.enabled = false
+      Book.enable_tracking
+      ActiveAudit.enabled?.should be_false
+      Book.track_history?.should be_false
+
+      ActiveAudit.enabled = true
+      Book.disable_tracking
+      ActiveAudit.enabled?.should be_true
+      Book.track_history?.should be_false
+
+      ActiveAudit.enabled = true
+      Book.enable_tracking
+      ActiveAudit.enabled?.should be_true
+      Book.track_history?.should be_true
+    end
+  end
 end

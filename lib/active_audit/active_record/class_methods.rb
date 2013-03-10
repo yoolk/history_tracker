@@ -25,7 +25,7 @@ module ActiveAudit
       end
 
       def track_history?
-        track_history_per_model
+        ActiveAudit.enabled? and track_history_per_model
       end
 
       def disable_tracking
