@@ -6,8 +6,7 @@ module ActiveAudit
 
         if audit_options[:class_name].present?
           klass = audit_options[:class_name].constantize
-        elsif reflections[audit_options[:scope]].present?
-          reflection = reflections.find { |name, reflection| name == audit_options[:scope] }[1]
+        elsif reflection = reflect_on_association(audit_options[:scope])
           klass = reflection.klass.audit_class
         else
           klass = self.const_get(:Audit) rescue nil

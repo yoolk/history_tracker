@@ -24,16 +24,20 @@ module ActiveAudit
       def association_chain
         return @association_chain if @association_chain
 
-        # relation: belongs_to
-        if reflections[audit_options[:scope]].present?
-          main = send(audit_options[:scope])
-          reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
-          @association_chain = [
-            { id: main.id, name: main.class.name },
-            { id: id, name: reflection.name.to_s }
-          ]
-        else
+        scope = audit_options[:scope]
+        if scope == self.class.name.underscore
           @association_chain = [{ id: id, name: self.class.name }]
+        else
+          raise "Couldn't find scope: #{scope}. Please, make sure you define this association or respond to this scope." unless respond_to?(scope)
+
+          main = send(scope)
+          reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
+          @association_chain = case reflection.macro
+          when :has_one, :has_many
+            [ { id: main.id, name: main.class.name }, { id: id, name: reflection.name.to_s } ]
+          else
+            # TODO:
+          end
         end
         @association_chain
       end
