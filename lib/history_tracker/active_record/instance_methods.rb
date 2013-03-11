@@ -1,7 +1,7 @@
 module HistoryTracker
   module ActiveRecord
     module InstanceMethods
-      def tracked_changes
+      def history_tracks
         history_class.where(
           'association_chain'=> {'$all' => association_chain }, 
           'scope' => history_options[:scope]
@@ -28,7 +28,7 @@ module HistoryTracker
         if scope == self.class.name.underscore
           @association_chain = [{ id: id, name: self.class.name }]
         else
-          raise "Couldn't find scope: #{scope}. Please, make sure you define this association or respond to this scope." unless respond_to?(scope)
+          raise "Couldn't find scope: #{scope}. Please, make sure you define this association." unless self.class.reflect_on_association(history_options[:scope])
 
           main = send(scope)
           reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
@@ -62,17 +62,19 @@ module HistoryTracker
           modifier_id:       HistoryTracker.current_modifier.id
         }
 
-        original, modified = transform_changes(case method
+        tracked_changes = case method
           when :create
             tracked_attributes_for_create
           when :destroy
             tracked_attributes_for_destroy
           else
             tracked_attributes_for_update
-        end)
-
+        end
+        
+        original, modified = transform_changes(tracked_changes)
         @tracked_attributes[:original] = original
         @tracked_attributes[:modified] = modified
+        @tracked_attributes[:changeset] = (method == :destroy) ? {} : tracked_changes
         @tracked_attributes
       end
 
@@ -93,7 +95,7 @@ module HistoryTracker
       def tracked_attributes_for_destroy
         attributes.inject({}) do |h, pair|
           k,v  =  pair
-          h[k] = [nil, v]
+          h[k] = [v,nil]
           h
         end
       end

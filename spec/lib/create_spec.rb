@@ -11,11 +11,12 @@ describe 'Tracking changes when create' do
     it 'should retrieve changes history' do
       book = Book.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, read_count: 5)
 
-      tracked = book.tracked_changes.last
+      tracked = book.history_tracks.last
       tracked.should be_present
       # tracked.version.should  == 1
       tracked.original.should == {}
       tracked.modified.should == {"name"=>"MongoDB 101", "description"=>"Open source document database", "is_active"=>true, "read_count"=>5}
+      tracked.changeset.should == {"name"=>[nil, "MongoDB 101"], "description"=>[nil, "Open source document database"], "is_active"=>[nil, true], "read_count"=>[nil, 5]}
       tracked.action.should   == "create"
       tracked.scope.should    == "book"
     end
@@ -29,15 +30,17 @@ describe 'Tracking changes when create' do
     it 'should track changes with :only options' do
       book = BookOnly.create!(name: 'MongoDB 101', read_count: 101)
 
-      book.tracked_changes.last.original.should == {}
-      book.tracked_changes.last.modified.should == {"name"=>"MongoDB 101"}
+      book.history_tracks.last.original.should == {}
+      book.history_tracks.last.modified.should == {"name"=>"MongoDB 101"}
+      book.history_tracks.last.changeset.should == {"name"=>[nil, "MongoDB 101"]}
     end
 
     it 'should track changes with :except options' do
-      book = BookExcept.create!(name: 'MongoDB 101', read_count: 101)
+      book = BookExcept.create!(name: 'MongoDB 101', description: 'A comprehensive book', is_active: true, read_count: 101)
 
-      book.tracked_changes.last.original.should == {}
-      book.tracked_changes.last.modified.should == {"read_count"=>101}
+      book.history_tracks.last.original.should == {}
+      book.history_tracks.last.modified.should == {"description"=>"A comprehensive book", "is_active"=>true, "read_count"=>101}
+      book.history_tracks.last.changeset.should == {"description"=>[nil, "A comprehensive book"], "is_active"=>[nil, true], "read_count"=>[nil, 101]}
     end
 
     it 'should track change with on: [:create]' do

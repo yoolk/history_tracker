@@ -15,7 +15,7 @@ describe "Has Many Association" do
     it "should retrieve changes from child" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
 
-      tracked = comment.tracked_changes.last
+      tracked = comment.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@book.id, "name"=>"Book"},{"id"=>comment.id, "name"=>"comments"}]
       # tracked.version.should  == 1
@@ -28,9 +28,9 @@ describe "Has Many Association" do
     it "should retrieve changes from parent" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
 
-      @book.tracked_changes.count.should == 2
-      @book.tracked_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
-      @book.tracked_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      @book.history_tracks.count.should == 2
+      @book.history_tracks[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
+      @book.history_tracks[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
     end
   end
 
@@ -47,19 +47,19 @@ describe "Has Many Association" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
       comment.update_attributes!(title: 'Awesome Book', body: 'Awesome Author')
 
-      comment.tracked_changes.count.should == 2
-      comment.tracked_changes[0].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      comment.tracked_changes[1].modified.should == {"title"=>"Awesome Book", "body"=>"Awesome Author"}
+      comment.history_tracks.count.should == 2
+      comment.history_tracks[0].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      comment.history_tracks[1].modified.should == {"title"=>"Awesome Book", "body"=>"Awesome Author"}
     end
 
     it "should retrieve changes from parent" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
       comment.update_attributes!(title: 'Awesome Book', body: 'Awesome Author')
 
-      @book.tracked_changes.count.should == 3
-      @book.tracked_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
-      @book.tracked_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      @book.tracked_changes[2].modified.should == {"title"=>"Awesome Book", "body"=>"Awesome Author"}
+      @book.history_tracks.count.should == 3
+      @book.history_tracks[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
+      @book.history_tracks[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      @book.history_tracks[2].modified.should == {"title"=>"Awesome Book", "body"=>"Awesome Author"}
     end
   end
 
@@ -76,19 +76,19 @@ describe "Has Many Association" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
       comment.destroy
 
-      comment.tracked_changes.count.should == 2
-      comment.tracked_changes[0].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      comment.tracked_changes[1].modified.should include({"id"=>comment.id, "title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id})
+      comment.history_tracks.count.should == 2
+      comment.history_tracks[0].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      comment.history_tracks[1].modified.should == {}
     end
 
     it "should retrieve changes from parent" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
       comment.destroy
 
-      @book.tracked_changes.count.should == 3
-      @book.tracked_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
-      @book.tracked_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      @book.tracked_changes[2].modified.should include({"id"=>comment.id, "title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id})
+      @book.history_tracks.count.should == 3
+      @book.history_tracks[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
+      @book.history_tracks[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      @book.history_tracks[2].modified.should == {}
     end
 
     it "track changes when parent record is deleted" do

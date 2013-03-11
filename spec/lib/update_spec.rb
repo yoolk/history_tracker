@@ -13,11 +13,12 @@ describe 'Tracking changes when update' do
       book = Book.create!(name: 'MongoDB 102', read_count: 102)
       book.update_attributes!(name: 'MongoDB 201', read_count: 103)
 
-      tracked = book.tracked_changes.last
+      tracked = book.history_tracks.last
       tracked.should be_present
       # tracked.version.should  == 1
       tracked.original.should == {"name"=>"MongoDB 102", "read_count"=>102}
       tracked.modified.should == {"name"=>"MongoDB 201", "read_count"=>103}
+      tracked.changeset.should == {"name"=>["MongoDB 102", "MongoDB 201"], "read_count"=>[102, 103]}
       tracked.action.should   == "update"
       tracked.scope.should    == "book"
     end
@@ -34,16 +35,18 @@ describe 'Tracking changes when update' do
       book = BookOnly.create!(name: 'MongoDB 101', read_count: 101)
       book.update_attributes!(name: 'MongoDB 102', read_count: 102)
 
-      book.tracked_changes.last.original.should == {"name"=>"MongoDB 101"}
-      book.tracked_changes.last.modified.should == {"name"=>"MongoDB 102"}
+      book.history_tracks.last.original.should == {"name"=>"MongoDB 101"}
+      book.history_tracks.last.modified.should == {"name"=>"MongoDB 102"}
+      book.history_tracks.last.changeset.should == {"name"=>["MongoDB 101", "MongoDB 102"]}
     end
 
     it 'should track changes with :except options' do
       book = BookExcept.create!(name: 'MongoDB 101', read_count: 101)
       book.update_attributes!(name: 'MongoDB 102', read_count: 102)
 
-      book.tracked_changes.last.original.should == {"read_count"=>101}
-      book.tracked_changes.last.modified.should == {"read_count"=>102}
+      book.history_tracks.last.original.should == {"read_count"=>101}
+      book.history_tracks.last.modified.should == {"read_count"=>102}
+      book.history_tracks.last.changeset.should == {"read_count"=>[101, 102]}
     end
 
     it 'should not track changes with :except, all columns' do

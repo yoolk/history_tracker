@@ -13,11 +13,12 @@ describe 'Tracking changes when destroy' do
       book = Book.create!(name: 'MongoDB 102', read_count: 102)
       book.destroy
 
-      tracked = book.tracked_changes.last
+      tracked = book.history_tracks.last
       tracked.should be_present
       # tracked.version.should  == 1
-      tracked.original.should == {}
-      tracked.modified.should include({"id"=>book.id, "name"=>"MongoDB 102", "read_count"=>102})
+      tracked.original.should include({"id"=>book.id, "name"=>"MongoDB 102", "read_count"=>102})
+      tracked.modified.should == {}
+      tracked.changeset.should == {}
       tracked.action.should   == "destroy"
       tracked.scope.should    == "book"
     end
@@ -34,16 +35,16 @@ describe 'Tracking changes when destroy' do
       book = BookOnly.create!(name: 'MongoDB 101', read_count: 101)
       book.destroy
 
-      book.tracked_changes.last.original.should == {}
-      book.tracked_changes.last.modified.should include({"id"=>book.id, "name"=>"MongoDB 101", "read_count"=>101})
+      book.history_tracks.last.modified.should == {}
+      book.history_tracks.last.original.should include({"id"=>book.id, "name"=>"MongoDB 101", "read_count"=>101})
     end
 
     it 'should track changes with :except options' do
       book = BookExcept.create!(name: 'MongoDB 101', read_count: 101)
       book.destroy
 
-      book.tracked_changes.last.original.should == {}
-      book.tracked_changes.last.modified.should include({"id"=>book.id, "name"=>"MongoDB 101", "read_count"=>101})
+      book.history_tracks.last.original.should include({"id"=>book.id, "name"=>"MongoDB 101", "read_count"=>101})
+      book.history_tracks.last.modified.should == {}
     end
 
     it 'should track change with on: [:destroy]' do
