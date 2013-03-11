@@ -54,8 +54,17 @@ module HistoryTracker
         [ original, modified ]
       end
 
-      def tracked_attributes(method)
-        @tracked_attributes = {
+      def tracked_attributes
+        tracked_attributes = attributes
+        history_options[:include].each do |association|
+          tracked_attributes[association] = send(association).attributes
+        end
+
+        tracked_attributes
+      end
+
+      def tracked_attributes_for(method)
+        tracked_attributes = {
           association_chain: association_chain,
           scope:             history_options[:scope].to_s,
           action:            method,
@@ -72,14 +81,14 @@ module HistoryTracker
         end
         
         original, modified = transform_changes(tracked_changes)
-        @tracked_attributes[:original] = original
-        @tracked_attributes[:modified] = modified
-        @tracked_attributes[:changeset] = (method == :destroy) ? {} : tracked_changes
-        @tracked_attributes
+        tracked_attributes[:original] = original
+        tracked_attributes[:modified] = modified
+        tracked_attributes[:changeset] = (method == :destroy) ? {} : tracked_changes
+        tracked_attributes
       end
 
       def tracked_attributes_for_create
-        attributes.inject({}) do |h, pair|
+        tracked_attributes.inject({}) do |h, pair|
           k,v  =  pair
           h[k] = [nil, v]
           h
@@ -89,11 +98,19 @@ module HistoryTracker
       end
 
       def tracked_attributes_for_update
-        changes.except(*non_tracked_columns)
+        tracked_changes = changes.except(*non_tracked_columns)
+        history_options[:include].each do |association|
+          reflection = self.class.reflect_on_association(association)
+          previous   = reflection.klass.find(changes[reflection.foreign_key][0]).attributes
+          now        = send(association).attributes
+
+          tracked_changes[reflection.name] = [previous, now]
+        end
+        tracked_changes
       end
 
       def tracked_attributes_for_destroy
-        attributes.inject({}) do |h, pair|
+        tracked_attributes.inject({}) do |h, pair|
           k,v  =  pair
           h[k] = [v,nil]
           h
@@ -103,20 +120,20 @@ module HistoryTracker
       def track_create
         return unless track_history?
 
-        history_class.create!(tracked_attributes(:create))
+        history_class.create!(tracked_attributes_for(:create))
       end
 
       def track_update
         return unless track_history?
         return if tracked_attributes_for_update.blank?
         
-        history_class.create!(tracked_attributes(:update))
+        history_class.create!(tracked_attributes_for(:update))
       end
 
       def track_destroy
         return unless track_history?
 
-        history_class.create!(tracked_attributes(:destroy))
+        history_class.create!(tracked_attributes_for(:destroy))
       end
     end
   end

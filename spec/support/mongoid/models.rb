@@ -1,4 +1,4 @@
-class BookHistory
+class ListingHistory
   include HistoryTracker::Mongoid::Tracker
-  store_in collection: 'book_histories'
+  store_in collection: 'listing_histories'
 end

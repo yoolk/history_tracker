@@ -1,44 +1,54 @@
-class Book < ActiveRecord::Base
+class Listing < ActiveRecord::Base
   has_many :comments, :dependent => :destroy
   track_history
 end
 
 class Comment < ActiveRecord::Base
-  belongs_to :book
-  track_history scope: :book
+  belongs_to :listing
+  track_history scope: :listing
 end
 
-class BookClassName < ActiveRecord::Base
-  self.table_name = :books
-  track_history class_name: 'BookHistory'
+class ListingClassName < ActiveRecord::Base
+  self.table_name = :listings
+  track_history class_name: 'ListingHistory'
 end
 
-class BookOnly < ActiveRecord::Base
-  self.table_name = :books
+class ListingOnly < ActiveRecord::Base
+  self.table_name = :listings
   track_history only: [:name]
 end
 
-class BookExcept < ActiveRecord::Base
-  self.table_name = :books
+class ListingExcept < ActiveRecord::Base
+  self.table_name = :listings
   track_history except: [:name]
 end
 
-class BookExceptAll < ActiveRecord::Base
-  self.table_name = :books
-  track_history except: [:name, :description, :read_count, :is_active]
+class ListingExceptAll < ActiveRecord::Base
+  self.table_name = :listings
+  track_history except: [:name, :description, :view_count, :is_active]
 end
 
-class BookOnCreate < ActiveRecord::Base
-  self.table_name = :books
+class ListingOnCreate < ActiveRecord::Base
+  self.table_name = :listings
   track_history on: [:create]
 end
 
-class BookOnUpdate < ActiveRecord::Base
-  self.table_name = :books
+class ListingOnUpdate < ActiveRecord::Base
+  self.table_name = :listings
   track_history on: [:update]
 end
 
-class BookOnDestroy < ActiveRecord::Base
-  self.table_name = :books
+class ListingOnDestroy < ActiveRecord::Base
+  self.table_name = :listings
   track_history on: [:destroy]
+end
+
+class Location < ActiveRecord::Base
+  self.table_name = :locations
+end
+
+class ListingInclude < ActiveRecord::Base
+  self.table_name = :listings
+  belongs_to :location
+  track_history include: [:location]
 end

@@ -3,76 +3,76 @@ require 'spec_helper'
 describe 'Tracking changes when create' do
   context "when enabled" do
     it 'should track changes' do
-      book = Book.new(name: 'MongoDB 101', description: 'Open source document database', is_active: true, read_count: 5)
+      listing = Listing.new(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
 
-      expect { book.save }.to change { Book.history_class.count }.by(1)
+      expect { listing.save }.to change { Listing.history_class.count }.by(1)
     end
 
     it 'should retrieve changes history' do
-      book = Book.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, read_count: 5)
+      listing = Listing.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
 
-      tracked = book.history_tracks.last
+      tracked = listing.history_tracks.last
       tracked.should be_present
       # tracked.version.should  == 1
       tracked.original.should == {}
-      tracked.modified.should == {"name"=>"MongoDB 101", "description"=>"Open source document database", "is_active"=>true, "read_count"=>5}
-      tracked.changeset.should == {"name"=>[nil, "MongoDB 101"], "description"=>[nil, "Open source document database"], "is_active"=>[nil, true], "read_count"=>[nil, 5]}
+      tracked.modified.should == {"name"=>"MongoDB 101", "description"=>"Open source document database", "is_active"=>true, "view_count"=>5}
+      tracked.changeset.should == {"name"=>[nil, "MongoDB 101"], "description"=>[nil, "Open source document database"], "is_active"=>[nil, true], "view_count"=>[nil, 5]}
       tracked.action.should   == "create"
-      tracked.scope.should    == "book"
+      tracked.scope.should    == "listing"
     end
 
     it 'should track changes with :class_name' do
       expect {
-        BookClassName.create!(name: 'MongoDB 101', read_count: 101)
-      }.to change { BookHistory.count }.by(1)
+        ListingClassName.create!(name: 'MongoDB 101', view_count: 101)
+      }.to change { ListingHistory.count }.by(1)
     end
 
     it 'should track changes with :only options' do
-      book = BookOnly.create!(name: 'MongoDB 101', read_count: 101)
+      listing = ListingOnly.create!(name: 'MongoDB 101', view_count: 101)
 
-      book.history_tracks.last.original.should == {}
-      book.history_tracks.last.modified.should == {"name"=>"MongoDB 101"}
-      book.history_tracks.last.changeset.should == {"name"=>[nil, "MongoDB 101"]}
+      listing.history_tracks.last.original.should == {}
+      listing.history_tracks.last.modified.should == {"name"=>"MongoDB 101"}
+      listing.history_tracks.last.changeset.should == {"name"=>[nil, "MongoDB 101"]}
     end
 
     it 'should track changes with :except options' do
-      book = BookExcept.create!(name: 'MongoDB 101', description: 'A comprehensive book', is_active: true, read_count: 101)
+      listing = ListingExcept.create!(name: 'MongoDB 101', description: 'A comprehensive listing', is_active: true, view_count: 101)
 
-      book.history_tracks.last.original.should == {}
-      book.history_tracks.last.modified.should == {"description"=>"A comprehensive book", "is_active"=>true, "read_count"=>101}
-      book.history_tracks.last.changeset.should == {"description"=>[nil, "A comprehensive book"], "is_active"=>[nil, true], "read_count"=>[nil, 101]}
+      listing.history_tracks.last.original.should == {}
+      listing.history_tracks.last.modified.should == {"description"=>"A comprehensive listing", "is_active"=>true, "view_count"=>101}
+      listing.history_tracks.last.changeset.should == {"description"=>[nil, "A comprehensive listing"], "is_active"=>[nil, true], "view_count"=>[nil, 101]}
     end
 
     it 'should track change with on: [:create]' do
-      book = BookOnCreate.new(name: 'MongoDB 101', description: 'Open source document database', is_active: true, read_count: 5)
+      listing = ListingOnCreate.new(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
 
-      expect { book.save }.to change { BookOnCreate.history_class.count }.by(1)
-      expect { book.update_attributes(name: 'MongoDB 102') }.to_not change { BookOnCreate.history_class.count }
-      expect { book.destroy }.to_not change { BookOnCreate.history_class.count }
+      expect { listing.save }.to change { ListingOnCreate.history_class.count }.by(1)
+      expect { listing.update_attributes(name: 'MongoDB 102') }.to_not change { ListingOnCreate.history_class.count }
+      expect { listing.destroy }.to_not change { ListingOnCreate.history_class.count }
     end
   end
 
   context "when disabled" do
     after(:each) do
-      Book.enable_tracking
+      Listing.enable_tracking
     end
 
     it "should not track" do
-      Book.disable_tracking
+      Listing.disable_tracking
 
       expect {
-        Book.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, read_count: 5)
-      }.to change { Book.history_class.count }.by(0)
+        Listing.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+      }.to change { Listing.history_class.count }.by(0)
     end
 
     it "should not track #without_tracking without :save" do
-      book = Book.new(name: 'MongoDB 101')
-      expect { book.without_tracking { book.save! } }.to change { Book.history_class.count }.by(0)
+      listing = Listing.new(name: 'MongoDB 101')
+      expect { listing.without_tracking { listing.save! } }.to change { Listing.history_class.count }.by(0)
     end
 
     it "should not track #without_tracking with :save" do
-      book = Book.new(name: 'MongoDB 101')
-      expect { book.without_tracking(:save) }.to change { Book.history_class.count }.by(0)
+      listing = Listing.new(name: 'MongoDB 101')
+      expect { listing.without_tracking(:save) }.to change { Listing.history_class.count }.by(0)
     end
   end
 end
