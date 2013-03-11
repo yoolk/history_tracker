@@ -1,7 +1,7 @@
-require 'active_audit/version'
+require 'history_tracker/version'
 require 'active_support/concern'
 
-module ActiveAudit
+module HistoryTracker
   class << self
     attr_accessor :ignored_attributes, :current_user_method
 
@@ -10,12 +10,12 @@ module ActiveAudit
     end
 
     def enabled?
-      enabled = Thread.current[:active_audit_enabled]
+      enabled = Thread.current[:history_tracker_enabled]
       enabled.nil? ? true : enabled
     end
 
     def enabled=(value)
-      Thread.current[:active_audit_enabled] = value
+      Thread.current[:history_tracker_enabled] = value
     end
   end
 
@@ -24,5 +24,5 @@ module ActiveAudit
   @current_user_method = :current_user
 end
 
-require 'active_audit/active_record'
-require 'active_audit/mongoid'
+require 'history_tracker/active_record'
+require 'history_tracker/mongoid'

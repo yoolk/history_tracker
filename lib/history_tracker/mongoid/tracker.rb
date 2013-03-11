@@ -1,6 +1,6 @@
-module ActiveAudit
+module HistoryTracker
   module Mongoid
-    module AuditTrail
+    module Tracker
       extend ActiveSupport::Concern
 
       included do

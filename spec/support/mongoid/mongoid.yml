@@ -1,7 +1,7 @@
 test:
   sessions:
     default:
-      database: active_audit
+      database: history_tracker
       hosts:
         - localhost:27017
       options:

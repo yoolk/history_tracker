@@ -1,16 +1,16 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'active_audit/version'
+require 'history_tracker/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "activeaudit"
-  gem.version       = ActiveAudit::VERSION
+  gem.name          = "history_tracker"
+  gem.version       = HistoryTracker::VERSION
   gem.authors       = ["chamnap", "vorleak"]
   gem.email         = ["chamnapchhorn@gmail.com", "vorleak.chy@gmail.com"]
-  gem.description   = %q{ActiveAudit is a simple audit gem that allows you to track changes your ActiveRecord models and stores those data in MongoDB}
+  gem.description   = %q{A Simple gem that track changes your ActiveRecord models and stores those data in MongoDB}
   gem.summary       = %q{Track changes ActiveRecord models and stores in MongoDB}
-  gem.homepage      = "https://github.com/yoolk/active_audit"
+  gem.homepage      = "https://github.com/yoolk/history_tracker"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

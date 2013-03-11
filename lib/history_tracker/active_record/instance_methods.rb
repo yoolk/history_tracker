@@ -1,15 +1,15 @@
-module ActiveAudit
+module HistoryTracker
   module ActiveRecord
     module InstanceMethods
-      def audited_changes
-        audit_class.where(
+      def tracked_changes
+        history_class.where(
           'association_chain'=> {'$all' => association_chain }, 
-          'scope' => audit_options[:scope]
+          'scope' => history_options[:scope]
         )
       end
       
-      def audit_class
-        self.class.audit_class
+      def history_class
+        self.class.history_class
       end
 
       def without_tracking(method = nil)
@@ -24,7 +24,7 @@ module ActiveAudit
       def association_chain
         return @association_chain if @association_chain
 
-        scope = audit_options[:scope]
+        scope = history_options[:scope]
         if scope == self.class.name.underscore
           @association_chain = [{ id: id, name: self.class.name }]
         else
@@ -54,43 +54,43 @@ module ActiveAudit
         [ original, modified ]
       end
 
-      def audited_attributes(method)
-        @audited_attributes = {
+      def tracked_attributes(method)
+        @tracked_attributes = {
           association_chain: association_chain,
-          scope:             audit_options[:scope].to_s,
+          scope:             history_options[:scope].to_s,
           action:            method,
-          modifier_id:       ActiveAudit.current_modifier.id
+          modifier_id:       HistoryTracker.current_modifier.id
         }
 
         original, modified = transform_changes(case method
           when :create
-            audited_attributes_for_create
+            tracked_attributes_for_create
           when :destroy
-            audited_attributes_for_destroy
+            tracked_attributes_for_destroy
           else
-            audited_attributes_for_update
+            tracked_attributes_for_update
         end)
 
-        @audited_attributes[:original] = original
-        @audited_attributes[:modified] = modified
-        @audited_attributes
+        @tracked_attributes[:original] = original
+        @tracked_attributes[:modified] = modified
+        @tracked_attributes
       end
 
-      def audited_attributes_for_create
+      def tracked_attributes_for_create
         attributes.inject({}) do |h, pair|
           k,v  =  pair
           h[k] = [nil, v]
           h
         end.reject do |k, v|
-          non_audited_columns.include?(k)
+          non_tracked_columns.include?(k)
         end
       end
 
-      def audited_attributes_for_update
-        changes.except(*non_audited_columns)
+      def tracked_attributes_for_update
+        changes.except(*non_tracked_columns)
       end
 
-      def audited_attributes_for_destroy
+      def tracked_attributes_for_destroy
         attributes.inject({}) do |h, pair|
           k,v  =  pair
           h[k] = [nil, v]
@@ -98,23 +98,23 @@ module ActiveAudit
         end
       end
 
-      def audit_create
+      def track_create
         return unless track_history?
 
-        audit_class.create!(audited_attributes(:create))
+        history_class.create!(tracked_attributes(:create))
       end
 
-      def audit_update
+      def track_update
         return unless track_history?
-        return if audited_attributes_for_update.blank?
+        return if tracked_attributes_for_update.blank?
         
-        audit_class.create!(audited_attributes(:update))
+        history_class.create!(tracked_attributes(:update))
       end
 
-      def audit_destroy
+      def track_destroy
         return unless track_history?
 
-        audit_class.create!(audited_attributes(:destroy))
+        history_class.create!(tracked_attributes(:destroy))
       end
     end
   end

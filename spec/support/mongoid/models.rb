@@ -1,4 +1,4 @@
 class BookHistory
-  include ActiveAudit::Mongoid::AuditTrail
+  include HistoryTracker::Mongoid::Tracker
   store_in collection: 'book_histories'
 end

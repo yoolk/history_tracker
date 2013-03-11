@@ -1,4 +1,4 @@
-require 'active_audit'
+require 'history_tracker'
 require 'pry'
 
 # active_record

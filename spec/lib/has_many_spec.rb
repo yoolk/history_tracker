@@ -9,28 +9,28 @@ describe "Has Many Association" do
     it "should record changes" do
       expect {
         @book.comments.create!(title: 'Good Book', body: 'Awesome')
-      }.to change { Book.audit_class.count }.by(1)
+      }.to change { Book.history_class.count }.by(1)
     end
 
     it "should retrieve changes from child" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
 
-      audited = comment.audited_changes.last
-      audited.should be_present
-      audited.association_chain.should == [{"id"=>@book.id, "name"=>"Book"},{"id"=>comment.id, "name"=>"comments"}]
-      # audited.version.should  == 1
-      audited.original.should == {}
-      audited.modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      audited.action.should   == "create"
-      audited.scope.should    == "book"
+      tracked = comment.tracked_changes.last
+      tracked.should be_present
+      tracked.association_chain.should == [{"id"=>@book.id, "name"=>"Book"},{"id"=>comment.id, "name"=>"comments"}]
+      # tracked.version.should  == 1
+      tracked.original.should == {}
+      tracked.modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      tracked.action.should   == "create"
+      tracked.scope.should    == "book"
     end
 
     it "should retrieve changes from parent" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
 
-      @book.audited_changes.count.should == 2
-      @book.audited_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
-      @book.audited_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      @book.tracked_changes.count.should == 2
+      @book.tracked_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
+      @book.tracked_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
     end
   end
 
@@ -40,26 +40,26 @@ describe "Has Many Association" do
 
       expect {
         comment.update_attributes!(title: 'Awesome Book', body: 'Awesome Author')
-      }.to change { Book.audit_class.count }.by(1)
+      }.to change { Book.history_class.count }.by(1)
     end
 
     it "should retrieve changes from child" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
       comment.update_attributes!(title: 'Awesome Book', body: 'Awesome Author')
 
-      comment.audited_changes.count.should == 2
-      comment.audited_changes[0].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      comment.audited_changes[1].modified.should == {"title"=>"Awesome Book", "body"=>"Awesome Author"}
+      comment.tracked_changes.count.should == 2
+      comment.tracked_changes[0].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      comment.tracked_changes[1].modified.should == {"title"=>"Awesome Book", "body"=>"Awesome Author"}
     end
 
     it "should retrieve changes from parent" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
       comment.update_attributes!(title: 'Awesome Book', body: 'Awesome Author')
 
-      @book.audited_changes.count.should == 3
-      @book.audited_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
-      @book.audited_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      @book.audited_changes[2].modified.should == {"title"=>"Awesome Book", "body"=>"Awesome Author"}
+      @book.tracked_changes.count.should == 3
+      @book.tracked_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
+      @book.tracked_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      @book.tracked_changes[2].modified.should == {"title"=>"Awesome Book", "body"=>"Awesome Author"}
     end
   end
 
@@ -69,26 +69,26 @@ describe "Has Many Association" do
 
       expect {
         comment.destroy
-      }.to change { Book.audit_class.count }.by(1)
+      }.to change { Book.history_class.count }.by(1)
     end
 
     it "should retrieve changes from child" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
       comment.destroy
 
-      comment.audited_changes.count.should == 2
-      comment.audited_changes[0].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      comment.audited_changes[1].modified.should include({"id"=>comment.id, "title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id})
+      comment.tracked_changes.count.should == 2
+      comment.tracked_changes[0].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      comment.tracked_changes[1].modified.should include({"id"=>comment.id, "title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id})
     end
 
     it "should retrieve changes from parent" do
       comment = @book.comments.create!(title: 'Good Book', body: 'Awesome')
       comment.destroy
 
-      @book.audited_changes.count.should == 3
-      @book.audited_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
-      @book.audited_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
-      @book.audited_changes[2].modified.should include({"id"=>comment.id, "title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id})
+      @book.tracked_changes.count.should == 3
+      @book.tracked_changes[0].modified.should == {"name"=>"MongoDB 101", "read_count"=>101}
+      @book.tracked_changes[1].modified.should == {"title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id}
+      @book.tracked_changes[2].modified.should include({"id"=>comment.id, "title"=>"Good Book", "body"=>"Awesome", "book_id"=>@book.id})
     end
 
     it "track changes when parent record is deleted" do
@@ -96,7 +96,7 @@ describe "Has Many Association" do
 
       expect {
         @book.destroy
-      }.to change { Book.audit_class.count }.by(2)
+      }.to change { Book.history_class.count }.by(2)
     end
   end
 end
