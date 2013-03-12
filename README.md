@@ -40,7 +40,7 @@ However, you can specify the history class name with `:class_name` options. All 
 By default, this gem will invoke `current_user` method and save its id and attributes on each change. However, you can change it by sets the `current_user_method` using a Rails initializer.
 
     # config/initializers/history_tracker.rb
-    Mongoid::History.current_user_method = :authenticated_user
+    HistoryTracker.current_user_method = :authenticated_user
 
     # Assume that current_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
     >> listing = Listing.first
@@ -63,7 +63,7 @@ HistoryTracker is simple to use. Just call `track_history` to a model to track c
                       :except     => [],                              # track all fields except the specified fields 
                       :on         => [:create, :update, :destroy],    # by default, it tracks all events
                       :include    => [],                              # track :belongs_to association
-                      :association_chain => lambda { |record| [] } # specify association_chain for complex relations
+                      :association_chain => lambda { |record| [] }    # specify association_chain for complex relations
     end
 
 This gives you a `history_tracks` method which returns historical changes to your model.
@@ -83,7 +83,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> track.scope      #=> listing
     >> track.action     #=> update
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
-    >> track.original   #=> {"name" => "Listing 1","created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
+    >> track.original   #=> {"name" => "Listing 1"}
     >> track.modified   #=> {"name" => "New Listing 1"}
     >> track.changset   #=> {"name": ["Listing 1", "New Listing 1"]}
 
@@ -92,7 +92,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> track.scope      #=> listing
     >> track.action     #=> destroy
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
-    >> track.original   #=> {"name" => "Listing 1","created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
+    >> track.original   #=> {"name" => "Listing 1"}
     >> track.modified   #=> {}
     >> track.changset   #=> {}
 
@@ -128,8 +128,8 @@ This gives you a `history_tracks` method which returns historical changes to you
 
     >> listing.update_attributes(location: siem_reap)
     >> track = listing.history_tracks.last
-    >> track.original  # {"name"=>"Listing 1", "location"=>{"id"=>1, "name"=>"Phnom Penh"}}
-    >> track.modified  # {"name"=>"Listing 1", "location"=>{"id"=>2, "name"=>"Siem Reap"}}
+    >> track.original  # {"location"=>{"id"=>1, "name"=>"Phnom Penh"}}
+    >> track.modified  # {"location"=>{"id"=>2, "name"=>"Siem Reap"}}
     >> track.changeset # {"location"=>[{"id"=>1, "name"=>"Phnom Penh"}, {"id"=>2, "name"=>"Siem Reap"}]}
 
 #### Nested Relation
