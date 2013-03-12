@@ -13,7 +13,6 @@ describe 'Tracking changes when create' do
 
       tracked = listing.history_tracks.last
       tracked.should be_present
-      # tracked.version.should  == 1
       tracked.original.should == {}
       tracked.modified.should == {"name"=>"MongoDB 101", "description"=>"Open source document database", "is_active"=>true, "view_count"=>5}
       tracked.changeset.should include({"name"=>[nil, "MongoDB 101"], "description"=>[nil, "Open source document database"], "is_active"=>[nil, true], "view_count"=>[nil, 5]})

@@ -19,7 +19,6 @@ describe "Nested Association" do
       tracked = image.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"Listing"},{"id"=>@album.id, "name"=>"albums"},{"id"=>image.id, "name"=>"images"}]
-      # tracked.version.should  == 1
       tracked.original.should == {}
       tracked.modified.should == {"caption"=>"Product A", "album_id"=>@album.id}
       tracked.action.should   == "create"
@@ -61,7 +60,6 @@ describe "Nested Association" do
       tracked = @image.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"Listing"},{"id"=>@album.id, "name"=>"albums"},{"id"=>@image.id, "name"=>"images"}]
-      # tracked.version.should  == 1
       tracked.original.should == {"caption"=>"Product A"}
       tracked.modified.should == {"caption"=>"Product B"}
       tracked.changeset.should == {"caption"=>["Product A", "Product B"]}
@@ -106,7 +104,6 @@ describe "Nested Association" do
       tracked = @image.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"Listing"},{"id"=>@album.id, "name"=>"albums"},{"id"=>@image.id, "name"=>"images"}]
-      # tracked.version.should  == 1
       tracked.original.should == {"id"=>@image.id, "caption"=>"Product A", "album_id"=>@album.id}
       tracked.modified.should == {}
       tracked.changeset.should == {}

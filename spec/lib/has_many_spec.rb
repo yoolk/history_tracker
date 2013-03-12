@@ -18,7 +18,6 @@ describe "Has Many Association" do
       tracked = comment.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"Listing"},{"id"=>comment.id, "name"=>"comments"}]
-      # tracked.version.should  == 1
       tracked.original.should == {}
       tracked.modified.should == {"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>@listing.id}
       tracked.action.should   == "create"

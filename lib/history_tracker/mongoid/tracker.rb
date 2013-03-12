@@ -6,15 +6,16 @@ module HistoryTracker
       included do
         include ::Mongoid::Document
         include ::Mongoid::Timestamps
+
+        index({ scope: 1, association_chain: 1 })
       
         field :modifier_id,       type: String
+        field :scope,             type: String
         field :association_chain, type: Array,   default: []
         field :modified,          type: Hash,    default: {}
         field :original,          type: Hash,    default: {}
         field :changeset,         type: Hash,    default: {}
-        field :version,           type: Integer
         field :action,            type: String
-        field :scope,             type: Array,   default: []
       end
     end
   end

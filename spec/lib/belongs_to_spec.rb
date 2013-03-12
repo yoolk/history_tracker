@@ -23,7 +23,6 @@ describe "Belongs To Association" do
       tracked = listing.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>listing.id, "name"=>"ListingInclude"}]
-      # tracked.version.should  == 1
       tracked.original.should == {}
       tracked.modified.should == {"name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location"=>{"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}}
       tracked.changeset.should == {"name"=>[nil, "MongoDB Listing"], "description"=>[nil, "Document Database"], "is_active"=>[nil, true], "view_count"=>[nil, 101], "location"=>[nil, {"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}]}
@@ -49,7 +48,6 @@ describe "Belongs To Association" do
       tracked = @listing.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"ListingInclude"}]
-      # tracked.version.should  == 1
       tracked.original.should == {"name"=>"MongoDB Listing", "location"=>{"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}}
       tracked.modified.should == {"name"=>"MongoDB Listing 1", "location"=>{"id"=>@location2.id, "name"=>@location2.name, "priority"=>@location2.priority}}
       tracked.changeset.should == {"name"=>["MongoDB Listing", "MongoDB Listing 1"], "location"=>[{"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}, {"id"=>@location2.id, "name"=>@location2.name, "priority"=>@location2.priority}]}
@@ -75,7 +73,6 @@ describe "Belongs To Association" do
       tracked = @listing.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"ListingInclude"}]
-      # tracked.version.should  == 1
       tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location"=>{"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}})
       tracked.modified.should == {}
       tracked.changeset.should == {}

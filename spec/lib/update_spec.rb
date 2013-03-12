@@ -15,7 +15,6 @@ describe 'Tracking changes when update' do
 
       tracked = listing.history_tracks.last
       tracked.should be_present
-      # tracked.version.should  == 1
       tracked.original.should == {"name"=>"MongoDB 102", "view_count"=>102}
       tracked.modified.should == {"name"=>"MongoDB 201", "view_count"=>103}
       tracked.changeset.should == {"name"=>["MongoDB 102", "MongoDB 201"], "view_count"=>[102, 103]}
