@@ -15,6 +15,7 @@ describe 'Tracking changes when destroy' do
 
       tracked = listing.history_tracks.last
       tracked.should be_present
+      tracked.modifier.should == {"id"=>1, "email"=>"chamnap@yoolk.com"}
       tracked.original.should include({"id"=>listing.id, "name"=>"MongoDB 102", "view_count"=>102})
       tracked.modified.should == {}
       tracked.changeset.should == {}

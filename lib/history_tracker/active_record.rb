@@ -8,4 +8,6 @@ module HistoryTracker
   end
 end
 
-::ActiveRecord::Base.send :include, HistoryTracker::ActiveRecord::TrackHistory
+ActiveSupport.on_load(:active_record) do
+  include HistoryTracker::ActiveRecord::TrackHistory
+end

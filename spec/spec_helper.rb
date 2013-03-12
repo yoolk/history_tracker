@@ -20,6 +20,8 @@ RSpec.configure do |config|
   end
 end
 
+# Stub current user
+User.create!(id: 1, email: 'chamnap@yoolk.com')
 def current_user
-  OpenStruct.new(id: 1)
+  User.find(1)
 end

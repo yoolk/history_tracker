@@ -18,6 +18,7 @@ describe "Nested Association" do
 
       tracked = image.history_tracks.last
       tracked.should be_present
+      tracked.modifier.should == {"id"=>1, "email"=>"chamnap@yoolk.com"}
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"Listing"},{"id"=>@album.id, "name"=>"albums"},{"id"=>image.id, "name"=>"images"}]
       tracked.original.should == {}
       tracked.modified.should == {"caption"=>"Product A", "album_id"=>@album.id}

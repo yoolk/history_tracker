@@ -72,7 +72,8 @@ module HistoryTracker
           association_chain: association_chain,
           scope:             history_options[:scope].to_s,
           action:            method,
-          modifier_id:       HistoryTracker.current_modifier.id
+          modifier:          HistoryTracker.current_modifier.try(:attributes),
+          modifier_id:       HistoryTracker.current_modifier.try(:id)
         }
 
         tracked_changes = case method

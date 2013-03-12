@@ -6,7 +6,7 @@ module HistoryTracker
     attr_accessor :ignored_attributes, :current_user_method
 
     def current_modifier
-      send("#{current_user_method}".to_sym)
+      send("#{current_user_method}".to_sym) rescue nil
     end
 
     def enabled?

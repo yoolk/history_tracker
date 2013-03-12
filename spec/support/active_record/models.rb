@@ -1,3 +1,7 @@
+# User model
+class User < ActiveRecord::Base
+end
+
 # has_many relation
 class Listing < ActiveRecord::Base
   has_many :comments, :dependent => :destroy
