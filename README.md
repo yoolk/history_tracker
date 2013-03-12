@@ -136,6 +136,47 @@ This gives you a `history_tracks` method which returns historical changes to you
 
 For complex or nested relation, specify `:class_name` and `:association_chain` manually. For more examples, check out [spec/lib/nested_spec.rb] (https://github.com/yoolk/history_tracker/spec/lib/nested_spec.rb).
 
+## Enable/Disable Tracking
+
+Sometimes you don't want to store changes. Perhaps you are only interested in changes made by your users and don't need to store changes you make yourself in, say, a migration -- or when testing your application.
+
+You can enable or disable tracking in three ways: globally, per class, or per method call.
+
+#### Globally
+
+On a global level you can disable tracking like this:
+
+    >> HistoryTracker.enabled = false
+
+For example, you might want to disable tracking in your Rails application's test environment to speed up your tests. This will do it:
+
+    # in config/environments/test.rb
+    config.after_initialize do
+      HistoryTracker.enabled = false
+    end
+
+#### Per class
+
+If you are about change some widgets and you don't want to track your changes, you can disable tracking like this:
+
+    >> Listing.disable_tracking
+
+And enable back like this:
+
+    >> Listing.enable_tracking
+
+#### Per method call
+
+You can call a method without tracking changes using `without_tracking`. It takes either a method name as a symbol:
+
+    @listing.without_tracking :destroy
+
+Or a block:
+
+    @listing.without_tracking do
+      @listing.update_attributes :name => 'New Listing 1'
+    end
+
 ## Authors
 
 * [Chamnap Chhorn](https://github.com/chamnap)
