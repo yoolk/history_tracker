@@ -20,7 +20,6 @@ module HistoryTracker
         self.class.enable_tracking if tracking_was_enabled
       end
 
-      private
       def association_chain
         return @association_chain if @association_chain
 
@@ -28,20 +27,25 @@ module HistoryTracker
         if scope == self.class.name.underscore
           @association_chain = [{ id: id, name: self.class.name }]
         else
-          raise "Couldn't find scope: #{scope}. Please, make sure you define this association." unless self.class.reflect_on_association(history_options[:scope])
-
-          main = send(scope)
-          reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
-          @association_chain = case reflection.macro
-          when :has_one, :has_many
-            [ { id: main.id, name: main.class.name }, { id: id, name: reflection.name.to_s } ]
+          if self.class.reflect_on_association(history_options[:scope])
+            main = send(scope)
+            reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
+            @association_chain = case reflection.macro
+            when :has_one, :has_many
+              [ { id: main.id, name: main.class.name }, { id: id, name: reflection.name.to_s } ]
+            else
+              # TODO:
+            end
+          elsif history_options[:association_chain].present?
+            @association_chain = history_options[:association_chain].call(self)
           else
-            # TODO:
+            raise "Couldn't find scope: #{scope}. Please, make sure you define this association." 
           end
         end
         @association_chain
       end
 
+      private
       def transform_changes(changes)
         original = {}
         modified = {}

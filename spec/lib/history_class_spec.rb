@@ -24,7 +24,7 @@ describe 'History class' do
   end
 
   it 'returns tracked columns' do
-    Listing.tracked_columns.should == ["name", "description", "is_active", "view_count"]
+    Listing.tracked_columns.should == ["name", "description", "is_active", "view_count", "location_id"]
   end
 
   it 'returns non tracked columns' do

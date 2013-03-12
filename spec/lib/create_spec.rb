@@ -16,7 +16,7 @@ describe 'Tracking changes when create' do
       # tracked.version.should  == 1
       tracked.original.should == {}
       tracked.modified.should == {"name"=>"MongoDB 101", "description"=>"Open source document database", "is_active"=>true, "view_count"=>5}
-      tracked.changeset.should == {"name"=>[nil, "MongoDB 101"], "description"=>[nil, "Open source document database"], "is_active"=>[nil, true], "view_count"=>[nil, 5]}
+      tracked.changeset.should include({"name"=>[nil, "MongoDB 101"], "description"=>[nil, "Open source document database"], "is_active"=>[nil, true], "view_count"=>[nil, 5]})
       tracked.action.should   == "create"
       tracked.scope.should    == "listing"
     end
@@ -40,7 +40,7 @@ describe 'Tracking changes when create' do
 
       listing.history_tracks.last.original.should == {}
       listing.history_tracks.last.modified.should == {"description"=>"A comprehensive listing", "is_active"=>true, "view_count"=>101}
-      listing.history_tracks.last.changeset.should == {"description"=>[nil, "A comprehensive listing"], "is_active"=>[nil, true], "view_count"=>[nil, 101]}
+      listing.history_tracks.last.changeset.should == {"description"=>[nil, "A comprehensive listing"], "is_active"=>[nil, true], "view_count"=>[nil, 101], "location_id"=>[nil, nil]}
     end
 
     it 'should track change with on: [:create]' do
