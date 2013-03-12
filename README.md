@@ -92,7 +92,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> track.scope      #=> listing
     >> track.action     #=> destroy
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
-    >> track.original   #=> {"name" => "Listing 1"}
+    >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
     >> track.modified   #=> {}
     >> track.changset   #=> {}
 
