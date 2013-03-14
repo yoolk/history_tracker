@@ -67,8 +67,20 @@ module HistoryTracker
         tracked_attributes
       end
 
+      def original_attributes
+        original_attributes = attributes.merge(changed_attributes)
+        history_options[:include].each do |association|
+          reflection = self.class.reflect_on_association(association)
+          previous   = reflection.klass.find(changes[reflection.foreign_key][0]).attributes
+
+          original_attributes[association] = previous
+        end
+
+        original_attributes
+      end
+
       def tracked_attributes_for(method)
-        tracked_attributes = {
+        tracked_attributes_hash = {
           association_chain: association_chain,
           scope:             history_options[:scope].to_s,
           action:            method,
@@ -86,10 +98,10 @@ module HistoryTracker
         end
         
         original, modified = transform_changes(tracked_changes)
-        tracked_attributes[:original] = original
-        tracked_attributes[:modified] = modified
-        tracked_attributes[:changeset] = (method == :destroy) ? {} : tracked_changes
-        tracked_attributes
+        tracked_attributes_hash[:original] = (method == :update) ? original_attributes : original
+        tracked_attributes_hash[:modified] = modified
+        tracked_attributes_hash[:changeset] = (method == :destroy) ? {} : tracked_changes
+        tracked_attributes_hash
       end
 
       def tracked_attributes_for_create
@@ -108,9 +120,10 @@ module HistoryTracker
           reflection = self.class.reflect_on_association(association)
           previous   = reflection.klass.find(changes[reflection.foreign_key][0]).attributes
           now        = send(association).attributes
-
+        
           tracked_changes[reflection.name] = [previous, now]
         end
+        
         tracked_changes
       end
 

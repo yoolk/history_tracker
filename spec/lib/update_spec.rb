@@ -16,7 +16,7 @@ describe 'Tracking changes when update' do
       tracked = listing.history_tracks.last
       tracked.should be_present
       tracked.modifier.should == {"id"=>1, "email"=>"chamnap@yoolk.com"}
-      tracked.original.should == {"name"=>"MongoDB 102", "view_count"=>102}
+      tracked.original.should include({"id"=>listing.id, "name"=>"MongoDB 102", "view_count"=>102})
       tracked.modified.should == {"name"=>"MongoDB 201", "view_count"=>103}
       tracked.changeset.should == {"name"=>["MongoDB 102", "MongoDB 201"], "view_count"=>[102, 103]}
       tracked.action.should   == "update"
@@ -35,7 +35,7 @@ describe 'Tracking changes when update' do
       listing = ListingOnly.create!(name: 'MongoDB 101', view_count: 101)
       listing.update_attributes!(name: 'MongoDB 102', view_count: 102)
 
-      listing.history_tracks.last.original.should == {"name"=>"MongoDB 101"}
+      listing.history_tracks.last.original.should include({"id"=>listing.id, "name"=>"MongoDB 101", "view_count"=>101})
       listing.history_tracks.last.modified.should == {"name"=>"MongoDB 102"}
       listing.history_tracks.last.changeset.should == {"name"=>["MongoDB 101", "MongoDB 102"]}
     end
@@ -44,7 +44,7 @@ describe 'Tracking changes when update' do
       listing = ListingExcept.create!(name: 'MongoDB 101', view_count: 101)
       listing.update_attributes!(name: 'MongoDB 102', view_count: 102)
 
-      listing.history_tracks.last.original.should == {"view_count"=>101}
+      listing.history_tracks.last.original.should include({"id"=>listing.id, "name"=>"MongoDB 101", "view_count"=>101})
       listing.history_tracks.last.modified.should == {"view_count"=>102}
       listing.history_tracks.last.changeset.should == {"view_count"=>[101, 102]}
     end

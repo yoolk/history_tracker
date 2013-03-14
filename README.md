@@ -76,16 +76,16 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
     >> track.original   #=> {}
     >> track.modified   #=> {"name": "Listing 1"}
-    >> track.changset   #=> {"name": [nil, "Listing 1"]}
+    >> track.changeset  #=> {"name": [nil, "Listing 1"]}
 
     >> listing.update_attributes(name: 'New Listing 1')
     >> track = listing.history_tracks.last
     >> track.scope      #=> listing
     >> track.action     #=> update
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
-    >> track.original   #=> {"name" => "Listing 1"}
+    >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
     >> track.modified   #=> {"name" => "New Listing 1"}
-    >> track.changset   #=> {"name": ["Listing 1", "New Listing 1"]}
+    >> track.changeset  #=> {"name": ["Listing 1", "New Listing 1"]}
 
     >> listing.destroy
     >> track = listing.history_tracks.last
@@ -94,7 +94,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
     >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
     >> track.modified   #=> {}
-    >> track.changset   #=> {}
+    >> track.changeset  #=> {}
 
 #### Relation: `belongs_to`, `has_one` and `has_many`
 
@@ -119,7 +119,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     end
 
     >> phnom_penh = Location.create(name: 'Phnom Penh')
-    >> siem_reap  = Locaiton.create(name: 'Siem Reap')
+    >> siem_reap  = Location.create(name: 'Siem Reap')
     >> listing = Listing.create(name: 'Listing 1', location: phnom_penh)
     >> comment = listing.comments.create(body: 'Good listing')
 
@@ -134,7 +134,7 @@ This gives you a `history_tracks` method which returns historical changes to you
 
 #### Nested Relation
 
-For complex or nested relation, specify `:class_name` and `:association_chain` manually. For more examples, check out [spec/lib/nested_spec.rb] (https://github.com/yoolk/history_tracker/spec/lib/nested_spec.rb).
+For complex or nested relation, specify `:class_name` and `:association_chain` manually. For more examples, check out [spec/lib/nested_spec.rb] (https://github.com/yoolk/history_tracker/blob/master/spec/lib/nested_spec.rb).
 
 ## Enable/Disable Tracking
 

@@ -61,7 +61,7 @@ describe "Nested Association" do
       tracked = @image.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"Listing"},{"id"=>@album.id, "name"=>"albums"},{"id"=>@image.id, "name"=>"images"}]
-      tracked.original.should == {"caption"=>"Product A"}
+      tracked.original.should == {"id"=>@image.id, "caption"=>"Product A", "album_id"=>@album.id}
       tracked.modified.should == {"caption"=>"Product B"}
       tracked.changeset.should == {"caption"=>["Product A", "Product B"]}
       tracked.action.should   == "update"
