@@ -42,7 +42,7 @@ By default, this gem will invoke `current_user` method and save its id and attri
     # config/initializers/history_tracker.rb
     HistoryTracker.current_user_method = :authenticated_user
 
-    # Assume that current_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
+    # Assume that authenticated_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
     >> listing = Listing.first
     >> listing.update_attributes(name: 'New Name')
 
@@ -128,7 +128,7 @@ This gives you a `history_tracks` method which returns historical changes to you
 
     >> listing.update_attributes(location: siem_reap)
     >> track = listing.history_tracks.last
-    >> track.original  # {"location"=>{"id"=>1, "name"=>"Phnom Penh"}}
+    >> track.original  # {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC, "location"=>{"id"=>1, "name"=>"Phnom Penh"}}
     >> track.modified  # {"location"=>{"id"=>2, "name"=>"Siem Reap"}}
     >> track.changeset # {"location"=>[{"id"=>1, "name"=>"Phnom Penh"}, {"id"=>2, "name"=>"Siem Reap"}]}
 
