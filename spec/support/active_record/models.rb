@@ -35,7 +35,7 @@ end
 
 class ListingExceptAll < ActiveRecord::Base
   self.table_name = :listings
-  track_history except: [:name, :description, :view_count, :is_active]
+  track_history except: [:name, :description, :view_count, :is_active, :location_id]
 end
 
 # :create callback

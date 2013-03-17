@@ -137,6 +137,7 @@ module HistoryTracker
 
       def track_create
         return unless track_history?
+        return if tracked_attributes_for_create.blank?
 
         history_class.create!(tracked_attributes_for(:create))
       end
