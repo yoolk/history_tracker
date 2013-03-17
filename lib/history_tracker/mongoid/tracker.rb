@@ -22,7 +22,6 @@ module HistoryTracker
 
         validates :scope, :association_chain, :modifier_id, :modifier, :action,
                   presence: true
-
         validate :validate_original_modified_and_changeset
 
         private

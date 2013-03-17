@@ -139,20 +139,28 @@ module HistoryTracker
         return unless track_history?
         return if tracked_attributes_for_create.blank?
 
-        history_class.create!(tracked_attributes_for(:create))
+        write_track(:create)
       end
 
       def track_update
         return unless track_history?
         return if tracked_attributes_for_update.blank?
         
-        history_class.create!(tracked_attributes_for(:update))
+        write_track(:update)
       end
 
       def track_destroy
         return unless track_history?
 
-        history_class.create!(tracked_attributes_for(:destroy))
+        write_track(:destroy)
+      end
+
+      def write_track(method)
+        begin
+          history_class.create!(tracked_attributes_for(method))
+        rescue
+          errors.add(:base, 'could not save the changes inside the history tracker') and raise
+        end
       end
     end
   end
