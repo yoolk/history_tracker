@@ -25,3 +25,4 @@ User.create!(id: 1, email: 'chamnap@yoolk.com')
 def current_user
   User.find(1)
 end
+HistoryTracker.current_modifier = current_user

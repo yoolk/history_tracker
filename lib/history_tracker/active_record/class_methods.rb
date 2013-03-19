@@ -24,7 +24,7 @@ module HistoryTracker
       end
 
       def track_history?
-        HistoryTracker.enabled? and track_history_per_model
+        HistoryTracker.enabled? and HistoryTracker.enabled_for_controller? and track_history_per_model
       end
 
       def disable_tracking

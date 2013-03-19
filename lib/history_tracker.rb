@@ -5,17 +5,35 @@ module HistoryTracker
   class << self
     attr_accessor :ignored_attributes, :current_user_method
 
-    def current_modifier
-      send("#{current_user_method}".to_sym) rescue nil
+    def config_store
+      Thread.current[:history_tracker] ||= {
+        enabled: true,
+        enabled_for_controller: true
+      }
     end
 
     def enabled?
-      enabled = Thread.current[:history_tracker_enabled]
-      enabled.nil? ? true : enabled
+      config_store[:enabled]
     end
 
     def enabled=(value)
-      Thread.current[:history_tracker_enabled] = value
+      config_store[:enabled] = value
+    end
+
+    def enabled_for_controller?
+      config_store[:enabled_for_controller]
+    end
+
+    def enabled_for_controller=(value)
+      config_store[:enabled_for_controller] = value
+    end
+
+    def current_modifier
+      config_store[:current_modifier]
+    end
+
+    def current_modifier=(value)
+      config_store[:current_modifier] = value
     end
   end
 
@@ -26,3 +44,4 @@ end
 
 require 'history_tracker/active_record'
 require 'history_tracker/mongoid'
+require 'history_tracker/controller'
