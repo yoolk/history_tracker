@@ -11,7 +11,7 @@ describe "Belongs To Association" do
   end
 
   context "when created" do
-    it "should record changes" do
+    it "should record when changes :belongs_to" do
       expect {
         listing = ListingInclude.create!(name: 'MongoDB Listing', description: 'Document Database', view_count: 101, is_active: true, location: @location1)
       }.to change { ListingInclude.history_class.count }.by(1)
@@ -39,6 +39,12 @@ describe "Belongs To Association" do
     it "should record changes" do
       expect {
         @listing.update_attributes(name: 'MongoDB Listing 1', location: @location2)
+      }.to change { ListingInclude.history_class.count }.by(1)
+    end
+
+    it "should record changes when doesn't changes :belongs_to" do
+      expect {
+        @listing.update_attributes(name: 'MongoDB Listing 1')
       }.to change { ListingInclude.history_class.count }.by(1)
     end
 
