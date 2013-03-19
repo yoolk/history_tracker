@@ -24,7 +24,8 @@ module HistoryTracker
         return @association_chain if @association_chain
 
         scope = history_options[:scope]
-        if scope == self.class.name.underscore
+
+        if scope.to_s == self.class.name.split('::').last.underscore
           @association_chain = [{ id: id, name: self.class.name }]
         else
           if self.class.reflect_on_association(history_options[:scope])

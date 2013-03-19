@@ -29,7 +29,7 @@ module HistoryTracker
         end
 
         def track_options!(options)
-          options[:scope]   ||= self.name.underscore
+          options[:scope]   ||= self.name.split('::').last.underscore
           options[:except]  ||= []
           options[:only]    ||= []
           options[:include] ||= []
