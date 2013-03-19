@@ -72,8 +72,9 @@ module HistoryTracker
         original_attributes = attributes.merge(changed_attributes)
         history_options[:include].each do |association|
           reflection = self.class.reflect_on_association(association)
-          previous   = reflection.klass.find(changes[reflection.foreign_key][0]).attributes
+          next if changes[reflection.foreign_key].blank?
 
+          previous   = reflection.klass.find(changes[reflection.foreign_key][0]).attributes
           original_attributes[association] = previous
         end
 
@@ -119,9 +120,10 @@ module HistoryTracker
         tracked_changes = changes.except(*non_tracked_columns)
         history_options[:include].each do |association|
           reflection = self.class.reflect_on_association(association)
+          next if changes[reflection.foreign_key].blank?
+
           previous   = reflection.klass.find(changes[reflection.foreign_key][0]).attributes
           now        = send(association).attributes
-        
           tracked_changes[reflection.name] = [previous, now]
         end
         
