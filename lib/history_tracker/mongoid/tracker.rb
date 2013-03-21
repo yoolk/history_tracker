@@ -13,15 +13,13 @@ module HistoryTracker
       
         field :scope,             type: String
         field :association_chain, type: Array,   default: []
-        field :modifier_id,       type: String
         field :modifier,          type: Hash,    default: {}
         field :original,          type: Hash,    default: {}
         field :modified,          type: Hash,    default: {}
         field :changeset,         type: Hash,    default: {}
         field :action,            type: String
 
-        validates :scope, :association_chain, :modifier_id, :modifier, :action,
-                  presence: true
+        validates :scope, :association_chain, :action, presence: true
         validate :validate_original_modified_and_changeset
 
         private

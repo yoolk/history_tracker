@@ -40,7 +40,7 @@ describe 'Tracking changes when create' do
 
       listing.history_tracks.last.original.should == {}
       listing.history_tracks.last.modified.should == {"description"=>"A comprehensive listing", "is_active"=>true, "view_count"=>101}
-      listing.history_tracks.last.changeset.should == {"description"=>[nil, "A comprehensive listing"], "is_active"=>[nil, true], "view_count"=>[nil, 101], "location_id"=>[nil, nil]}
+      listing.history_tracks.last.changeset.should == {"description"=>[nil, "A comprehensive listing"], "is_active"=>[nil, true], "view_count"=>[nil, 101]}
     end
 
     it 'should track change with on: [:create]' do

@@ -16,7 +16,7 @@ describe 'Tracking changes when update' do
       tracked = listing.history_tracks.last
       tracked.should be_present
       tracked.modifier.should == {"id"=>1, "email"=>"chamnap@yoolk.com"}
-      tracked.original.should include({"id"=>listing.id, "name"=>"MongoDB 102", "view_count"=>102})
+      tracked.original.should include({"id"=>listing.id, "name"=>"MongoDB 102", "view_count"=>102, "location_id"=>nil})
       tracked.modified.should == {"name"=>"MongoDB 201", "view_count"=>103}
       tracked.changeset.should == {"name"=>["MongoDB 102", "MongoDB 201"], "view_count"=>[102, 103]}
       tracked.action.should   == "update"
@@ -50,9 +50,8 @@ describe 'Tracking changes when update' do
     end
 
     it 'should not track changes with :except, all columns' do
-      listing = ListingExceptAll.create!(name: 'MongoDB 101', view_count: 101)
-
       expect {
+        listing = ListingExceptAll.create!(name: 'MongoDB 101', view_count: 101)
         listing.update_attributes!(name: 'MongoDB 102', view_count: 102)
       }.to change { ListingExceptAll.history_class.count }.by(0)
     end
