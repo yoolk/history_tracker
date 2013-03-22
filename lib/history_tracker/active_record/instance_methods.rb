@@ -3,7 +3,7 @@ module HistoryTracker
     module InstanceMethods
       def history_tracks
         history_class.where(
-          'association_chain'=> {'$all' => association_chain }, 
+          'association_chain' => { '$all' => association_chain }, 
           'scope' => history_options[:scope]
         )
       end
@@ -47,30 +47,39 @@ module HistoryTracker
       end
 
       private
-      def tracked_changes
-        tracked_changes = changes.except(*non_tracked_columns)
-        include_reflections.each do |reflection|
-          next if changes[reflection.foreign_key].blank?
-
-          previous   = reflection.klass.find(changes[reflection.foreign_key][0]).attributes
-          now        = send(reflection.name).attributes
-          tracked_changes[reflection.name] = [previous, now]
-        end
-        
-        tracked_changes
-      end
-
-      def original_attributes
-        original = attributes.merge(changed_attributes)
-        include_reflections.each do |reflection|
-          if changes[reflection.foreign_key].present?
-            original[reflection.name] = reflection.klass.find(changes[reflection.foreign_key][0]).attributes
+      def original_modified_and_changeset
+        original  = attributes.merge(changed_attributes)
+        modified  = attributes.except(*non_tracked_columns).reject { |k, v| v.nil? }
+        changeset = changes.except(*non_tracked_columns)
+        history_options[:include].each do |pair|
+          if pair.is_a?(Hash)
+            association_name, association_fields = pair.keys.first, pair.values.first
           else
-            original[reflection.name] = send(reflection.name).attributes
+            association_name, association_fields = pair, nil
+          end
+
+          reflection = self.class.reflect_on_association(association_name)
+          now        = send(reflection.name)
+          association_fields ||= now.attributes.keys
+          if changes[reflection.foreign_key] and changes[reflection.foreign_key][0].present?
+            previous = reflection.klass.find(changes[reflection.foreign_key][0])
+            association_fields.each do |field|
+              field_name = "#{reflection.name}_#{field}"
+              original[field_name]  = previous.send(field)
+              modified[field_name]  = now.send(field)
+              changeset[field_name] = [previous.send(field), now.send(field)]
+            end
+          else
+            association_fields.each do |field|
+              field_name = "#{reflection.name}_#{field}"
+              original[field_name]  = now.send(field)
+              modified[field_name]  = now.send(field)
+              changeset[field_name] = [nil, now.send(field)]
+            end
           end
         end
-
-        original
+        
+        [original, modified, changeset]
       end
 
       def tracked_attributes_for(method)
@@ -90,30 +99,20 @@ module HistoryTracker
             tracked_attributes_for_destroy
         end
         
-        tracked_attributes_hash[:original] = original
-        tracked_attributes_hash[:modified] = modified
+        tracked_attributes_hash[:original]  = original
+        tracked_attributes_hash[:modified]  = modified
         tracked_attributes_hash[:changeset] = changeset
         tracked_attributes_hash
       end
 
       def tracked_attributes_for_create
-        original  = {}
-        modified  = attributes.except(*non_tracked_columns).reject { |k, v| v.nil? }
-        include_reflections.each do |reflection|
-          modified[reflection.name] = send(reflection.name).attributes
-        end
-        changeset = modified.inject({}) do |h, pair|
-          k,v  =  pair
-          h[k] = [nil, v]
-          h
-        end
+        original, modified, changeset = original_modified_and_changeset
 
-        [original, modified, changeset]
+        [{}, modified, changeset]
       end
 
       def tracked_attributes_for_update
-        original  = original_attributes
-        changeset = tracked_changes
+        original, modified, changeset = original_modified_and_changeset
         modified  = changeset.inject({}) do |h, pair|
           k,v = pair
           h[k] = v[1]
@@ -124,28 +123,28 @@ module HistoryTracker
       end
 
       def tracked_attributes_for_destroy
-        [original_attributes, {}, {}]
+        [original_modified_and_changeset[0], {}, {}]
       end
 
       def track_create
         return unless track_history?
 
-        write_track(:create)
+        write_history_track(:create)
       end
 
       def track_update
         return unless track_history?
         
-        write_track(:update)
+        write_history_track(:update)
       end
 
       def track_destroy
         return unless track_history?
 
-        write_track(:destroy)
+        write_history_track(:destroy)
       end
 
-      def write_track(method)
+      def write_history_track(method)
         begin
           tracked_attributes = tracked_attributes_for(method)
           return if method.in?([:create, :update]) and tracked_attributes[:modified].blank? and tracked_attributes[:changeset].blank?

@@ -30,14 +30,14 @@ module HistoryTracker
 
     def current_modifier
       modifier = if config_store[:current_modifier]
-        config_store[:current_modifier].attributes.except(*current_user_fields)
+        config_store[:current_modifier]
       else
         {}
       end
     end
 
     def current_modifier=(value)
-      config_store[:current_modifier] = value
+      config_store[:current_modifier] = value.attributes.slice(*current_user_fields)
     end
   end
 
@@ -45,7 +45,7 @@ module HistoryTracker
 
   @current_user_method = :current_user
 
-  @current_user_fields = [:id, :email]
+  @current_user_fields = ['id', 'email']
 end
 
 require 'history_tracker/active_record'

@@ -67,6 +67,12 @@ class ListingInclude < ActiveRecord::Base
   track_history include: [:location]
 end
 
+class ListingIncludeFields < ActiveRecord::Base
+  self.table_name = :listings
+  belongs_to :location
+  track_history include: [:location => [:name]]
+end
+
 # nested relation
 class Album < ActiveRecord::Base
   belongs_to :listing

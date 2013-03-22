@@ -34,24 +34,8 @@ module HistoryTracker
           options[:only]    ||= []
           options[:include] ||= []
 
-          includes, except    = [], []
-          include_reflections = []
-          options[:include].each do |association_name|
-            reflection = reflect_on_association(association_name)
-            next if reflection.try(:macro) != :belongs_to
-
-            includes    << association_name
-            except      << reflection.foreign_key
-            include_reflections << reflection
-          end
-
           class_attribute :history_options, instance_writer: false
           self.history_options = options
-          self.history_options[:include] = includes
-          self.history_options[:except] += except
-
-          class_attribute :include_reflections, instance_writer: false
-          self.include_reflections = include_reflections
         end
 
         def track_column!

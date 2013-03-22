@@ -24,10 +24,20 @@ describe "Belongs To Association" do
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>listing.id, "name"=>"ListingInclude"}]
       tracked.original.should == {}
-      tracked.modified.should == {"name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location"=>{"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}}
-      tracked.changeset.should == {"name"=>[nil, "MongoDB Listing"], "description"=>[nil, "Document Database"], "is_active"=>[nil, true], "view_count"=>[nil, 101], "location"=>[nil, {"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}]}
+      tracked.modified.should == {"name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "location_priority"=>@location1.priority}
+      tracked.changeset.should == {"name"=>[nil, "MongoDB Listing"], "description"=>[nil, "Document Database"], "is_active"=>[nil, true], "view_count"=>[nil, 101], "location_id"=>[nil, @location1.id], "location_name"=>[nil, @location1.name], "location_priority"=>[nil, @location1.priority]}
       tracked.action.should   == "create"
       tracked.scope.should    == "listing_include"
+    end
+
+    it "should retrieve changes with selected fields" do
+      listing = ListingIncludeFields.create!(name: 'MongoDB Listing', description: 'Document Database', view_count: 101, is_active: true, location: @location1)
+
+      tracked = listing.history_tracks.last
+      tracked.should be_present
+      tracked.original.should == {}
+      tracked.modified.should == {"name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name}
+      tracked.changeset.should == {"name"=>[nil, "MongoDB Listing"], "description"=>[nil, "Document Database"], "is_active"=>[nil, true], "view_count"=>[nil, 101], "location_id"=>[nil, @location1.id], "location_name"=>[nil, @location1.name]}
     end
   end
 
@@ -54,11 +64,22 @@ describe "Belongs To Association" do
       tracked = @listing.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"ListingInclude"}]
-      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location"=>{"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}})
-      tracked.modified.should == {"name"=>"MongoDB Listing 1", "location"=>{"id"=>@location2.id, "name"=>@location2.name, "priority"=>@location2.priority}}
-      tracked.changeset.should == {"name"=>["MongoDB Listing", "MongoDB Listing 1"], "location"=>[{"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}, {"id"=>@location2.id, "name"=>@location2.name, "priority"=>@location2.priority}]}
+      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "location_priority"=>@location1.priority})
+      tracked.modified.should == {"name"=>"MongoDB Listing 1", "location_id"=>@location2.id, "location_name"=>@location2.name, "location_priority"=>@location2.priority}
+      tracked.changeset.should == {"name"=>["MongoDB Listing", "MongoDB Listing 1"], "location_id"=>[@location1.id, @location2.id], "location_name"=>[@location1.name, @location2.name], "location_priority"=>[@location1.priority, @location2.priority]}
       tracked.action.should   == "update"
       tracked.scope.should    == "listing_include"
+    end
+
+    it "should retrieve changes with selected fields" do
+      @listing = ListingIncludeFields.create!(name: 'MongoDB Listing', description: 'Document Database', view_count: 101, is_active: true, location: @location1)
+      @listing.update_attributes(name: 'MongoDB Listing 1', location: @location2)
+
+      tracked = @listing.history_tracks.last
+      tracked.should be_present
+      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name})
+      tracked.modified.should == {"name"=>"MongoDB Listing 1", "location_id"=>@location2.id, "location_name"=>@location2.name}
+      tracked.changeset.should == {"name"=>["MongoDB Listing", "MongoDB Listing 1"], "location_id"=>[@location1.id, @location2.id], "location_name"=>[@location1.name, @location2.name]}
     end
   end
 
@@ -79,11 +100,22 @@ describe "Belongs To Association" do
       tracked = @listing.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"ListingInclude"}]
-      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location"=>{"id"=>@location1.id, "name"=>@location1.name, "priority"=>@location1.priority}})
+      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "location_priority"=>@location1.priority})
       tracked.modified.should == {}
       tracked.changeset.should == {}
       tracked.action.should   == "destroy"
       tracked.scope.should    == "listing_include"
+    end
+
+    it "should retrieve changes" do
+      @listing = ListingIncludeFields.create!(name: 'MongoDB Listing', description: 'Document Database', view_count: 101, is_active: true, location: @location1)
+      @listing.destroy
+
+      tracked = @listing.history_tracks.last
+      tracked.should be_present
+      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name})
+      tracked.modified.should == {}
+      tracked.changeset.should == {}
     end
   end
 end
