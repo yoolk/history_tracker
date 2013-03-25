@@ -45,8 +45,8 @@ module HistoryTracker
               association_name, association_fields = pair, nil
             end
 
-            reflection = reflect_on_association(association_name)
             hash       = {}
+            reflection = reflect_on_association(association_name)
             hash[reflection] = association_fields
             include_reflections << hash
           end

@@ -6,7 +6,7 @@ HistoryTracker tracks historical changes for any active record models, including
 
 This gem depends on ActiveRecord 3.x and Mongoid 3.x. It's well tested on Ruby 1.9.3 only.
 
-    gem 'history_tracker', :git => 'git@github.com:yoolk/history_tracker.git'
+    gem 'history_tracker', :git => 'git://github.com/yoolk/history_tracker.git'
 
 ## Usage
 

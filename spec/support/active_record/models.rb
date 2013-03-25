@@ -70,7 +70,7 @@ end
 class ListingIncludeFields < ActiveRecord::Base
   self.table_name = :listings
   belongs_to :location
-  track_history include: [:location => [:name]]
+  track_history include: [{:location => [:name]}]
 end
 
 # nested relation

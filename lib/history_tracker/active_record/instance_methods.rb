@@ -61,21 +61,20 @@ module HistoryTracker
       end
 
       def tracked_attributes_for_update
-        original  = attributes.merge(changed_attributes)
+        original  = attributes.merge(changed_attributes).except(*history_options[:except])
         changeset = changes.except(*non_tracked_columns)
         modified  = changeset.inject({}) do |h, pair|
           k,v = pair
           h[k] = v[1]
           h
         end
-
         included  = original_modified_and_changeset_from_include(:update)
 
         [original.merge(included[0]), modified.merge(included[1]), changeset.merge(included[2])]
       end
 
       def tracked_attributes_for_destroy
-        original  = attributes.merge(changed_attributes)
+        original  = attributes.merge(changed_attributes).except(*history_options[:except])
         changeset = {}
         modified  = {}
 
