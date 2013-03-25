@@ -22,6 +22,14 @@ module HistoryTracker
         validates :scope, :association_chain, :action, presence: true
         validate :validate_original_modified_and_changeset
 
+        scope :recent, lambda { order_by(:created_at.desc) }
+        scope :updated, lambda { where(action: 'update') }
+        scope :since, lambda { |time| where(:created_at.gte => time) }
+
+        def self.recent_updated_since(time)
+          recent.updated.since(time)
+        end  
+
         private
         def validate_original_modified_and_changeset
           case action
