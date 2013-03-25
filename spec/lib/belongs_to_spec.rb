@@ -53,9 +53,9 @@ describe "Belongs To Association" do
     end
 
     it "should record changes when doesn't changes :belongs_to" do
-      expect {
-        @listing.update_attributes(name: 'MongoDB Listing 1')
-      }.to change { ListingInclude.history_class.count }.by(1)
+      @listing.update_attributes(name: 'MongoDB Listing 1')
+
+      @listing.history_tracks.last.modified.should == {"name"=>"MongoDB Listing 1"}
     end
 
     it "should retrieve changes" do

@@ -36,6 +36,22 @@ module HistoryTracker
 
           class_attribute :history_options, instance_writer: false
           self.history_options = options
+
+          include_reflections  = []
+          history_options[:include].each do |pair|
+            if pair.is_a?(Hash)
+              association_name, association_fields = pair.keys.first, pair.values.first
+            else
+              association_name, association_fields = pair, nil
+            end
+
+            reflection = reflect_on_association(association_name)
+            hash       = {}
+            hash[reflection] = association_fields
+            include_reflections << hash
+          end
+          class_attribute :include_reflections
+          self.include_reflections = include_reflections
         end
 
         def track_column!

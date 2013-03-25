@@ -47,38 +47,77 @@ module HistoryTracker
       end
 
       private
-      def original_modified_and_changeset
-        original  = attributes.merge(changed_attributes)
-        modified  = attributes.except(*non_tracked_columns).reject { |k, v| v.nil? }
+      def tracked_attributes_for_create
+        original  = {}
         changeset = changes.except(*non_tracked_columns)
-        history_options[:include].each do |pair|
-          if pair.is_a?(Hash)
-            association_name, association_fields = pair.keys.first, pair.values.first
-          else
-            association_name, association_fields = pair, nil
-          end
+        modified  = changeset.inject({}) do |h, pair|
+          k,v = pair
+          h[k] = v[1]
+          h
+        end
+        included  = original_modified_and_changeset_from_include(:create)
 
-          reflection = self.class.reflect_on_association(association_name)
+        [original.merge(included[0]), modified.merge(included[1]), changeset.merge(included[2])]
+      end
+
+      def tracked_attributes_for_update
+        original  = attributes.merge(changed_attributes)
+        changeset = changes.except(*non_tracked_columns)
+        modified  = changeset.inject({}) do |h, pair|
+          k,v = pair
+          h[k] = v[1]
+          h
+        end
+
+        included  = original_modified_and_changeset_from_include(:update)
+
+        [original.merge(included[0]), modified.merge(included[1]), changeset.merge(included[2])]
+      end
+
+      def tracked_attributes_for_destroy
+        original  = attributes.merge(changed_attributes)
+        changeset = {}
+        modified  = {}
+
+        included  = original_modified_and_changeset_from_include(:destroy)
+
+        [original.merge(included[0]), modified.merge(included[1]), changeset.merge(included[2])]
+      end
+
+      def original_modified_and_changeset_from_include(method)
+        original  = {}
+        modified  = {}
+        changeset = {}
+
+        include_reflections.each do |item|
+          reflection = item.keys.first
           now        = send(reflection.name)
-          association_fields ||= now.attributes.keys
-          if changes[reflection.foreign_key] and changes[reflection.foreign_key][0].present?
-            previous = reflection.klass.find(changes[reflection.foreign_key][0])
-            association_fields.each do |field|
+          fields     = item.values.first || now.attributes.keys
+
+          if method == :create
+            fields.each do |field|
               field_name = "#{reflection.name}_#{field}"
-              original[field_name]  = previous.send(field)
-              modified[field_name]  = now.send(field)
-              changeset[field_name] = [previous.send(field), now.send(field)]
-            end
-          else
-            association_fields.each do |field|
-              field_name = "#{reflection.name}_#{field}"
-              original[field_name]  = now.send(field)
               modified[field_name]  = now.send(field)
               changeset[field_name] = [nil, now.send(field)]
             end
+          elsif method == :update
+            if changes[reflection.foreign_key] and changes[reflection.foreign_key][0].present?
+              previous = reflection.klass.find(changes[reflection.foreign_key][0])
+              fields.each do |field|
+                field_name = "#{reflection.name}_#{field}"
+                original[field_name]  = previous.send(field)
+                modified[field_name]  = now.send(field)
+                changeset[field_name] = [previous.send(field), now.send(field)]
+              end
+            end
+          elsif method == :destroy
+            fields.each do |field|
+              field_name = "#{reflection.name}_#{field}"
+              original[field_name]  = now.send(field)
+            end
           end
         end
-        
+
         [original, modified, changeset]
       end
 
@@ -103,27 +142,6 @@ module HistoryTracker
         tracked_attributes_hash[:modified]  = modified
         tracked_attributes_hash[:changeset] = changeset
         tracked_attributes_hash
-      end
-
-      def tracked_attributes_for_create
-        original, modified, changeset = original_modified_and_changeset
-
-        [{}, modified, changeset]
-      end
-
-      def tracked_attributes_for_update
-        original, modified, changeset = original_modified_and_changeset
-        modified  = changeset.inject({}) do |h, pair|
-          k,v = pair
-          h[k] = v[1]
-          h
-        end
-
-        [original, modified, changeset]
-      end
-
-      def tracked_attributes_for_destroy
-        [original_modified_and_changeset[0], {}, {}]
       end
 
       def track_create

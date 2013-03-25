@@ -38,6 +38,7 @@ module HistoryTracker
 
     def current_modifier=(value)
       return unless value
+      
       config_store[:current_modifier] = value.attributes.slice(*current_user_fields)
     end
   end
