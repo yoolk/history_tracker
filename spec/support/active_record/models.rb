@@ -56,6 +56,11 @@ class ListingOnDestroy < ActiveRecord::Base
   track_history on: [:destroy]
 end
 
+class ListingNoCallback < ActiveRecord::Base
+  self.table_name = :listings
+  track_history on: []
+end
+
 # :include options
 class Location < ActiveRecord::Base
   self.table_name = :locations

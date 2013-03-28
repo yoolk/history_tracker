@@ -36,6 +36,7 @@ module HistoryTracker
           options[:only]      = options[:only].collect(&:to_s)
           options[:include] ||= []
           options[:methods] ||= []
+          options[:on]      ||= [:create, :update, :destroy]
 
           class_attribute :history_options, instance_writer: false
           self.history_options = options
@@ -72,9 +73,9 @@ module HistoryTracker
         end
 
         def track_callback!
-          after_create   :track_create   if !history_options[:on] || (history_options[:on] && history_options[:on].include?(:create))
-          before_update  :track_update   if !history_options[:on] || (history_options[:on] && history_options[:on].include?(:update))
-          before_destroy :track_destroy  if !history_options[:on] || (history_options[:on] && history_options[:on].include?(:destroy))
+          after_create   :track_create   if history_options[:on].include?(:create)
+          before_update  :track_update   if history_options[:on].include?(:update)
+          before_destroy :track_destroy  if history_options[:on].include?(:destroy)
         end
       end
     end

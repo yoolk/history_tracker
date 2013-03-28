@@ -75,4 +75,54 @@ describe 'Tracking changes when create' do
       expect { listing.without_tracking(:save) }.to change { Listing.history_class.count }.by(0)
     end
   end
+
+  context "#create_history_track" do
+    it "should not create history_track" do
+      listing = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+
+      listing.history_tracks.count.should == 0
+    end
+
+    it "should create history_track on :create" do
+      listing = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+
+      expect {
+        listing.create_history_track(:create, listing.previous_changes)
+      }.to change { listing.history_tracks.count }.by(1)
+    end
+
+    it "should create history_track with different modifier" do
+      listing = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+      user    = User.create!(id: 1, email: 'chamnapchhorn@gmail.com')
+
+      expect {
+        listing.create_history_track(:create, listing.previous_changes, user)
+      }.to change { listing.history_tracks.count }.by(1)
+    end
+
+    it "should create history_track on :update" do
+      listing = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+      listing.update_attributes(name: 'MongoDB 102')
+
+      expect {
+        listing.create_history_track(:update, listing.previous_changes)
+      }.to change { listing.history_tracks.count }.by(1)
+    end
+
+    it "should create history_track on :destroy" do
+      listing = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+      listing.destroy
+
+      expect {
+        changes = {
+          "name"=>["MongoDB 101", nil],
+          "description"=>["Open source document database", nil],
+          "is_active"=>[true, nil],
+          "view_count"=>[5, nil],
+          "id"=>[4, nil]
+        }
+        listing.create_history_track(:destroy, changes)
+      }.to change { listing.history_tracks.count }.by(1)
+    end
+  end
 end
