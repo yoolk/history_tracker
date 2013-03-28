@@ -64,7 +64,7 @@ describe "Belongs To Association" do
       tracked = @listing.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"ListingInclude"}]
-      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "location_priority"=>@location1.priority})
+      tracked.original.should be_equal({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "location_priority"=>@location1.priority, "created_at"=>@listing.created_at.utc, "updated_at"=>@listing.updated_at.utc})
       tracked.modified.should == {"name"=>"MongoDB Listing 1", "location_id"=>@location2.id, "location_name"=>@location2.name, "location_priority"=>@location2.priority}
       tracked.changeset.should == {"name"=>["MongoDB Listing", "MongoDB Listing 1"], "location_id"=>[@location1.id, @location2.id], "location_name"=>[@location1.name, @location2.name], "location_priority"=>[@location1.priority, @location2.priority]}
       tracked.action.should   == "update"
@@ -77,7 +77,7 @@ describe "Belongs To Association" do
 
       tracked = @listing.history_tracks.last
       tracked.should be_present
-      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name})
+      tracked.original.should be_equal({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "created_at"=>@listing.created_at.utc, "updated_at"=>@listing.updated_at.utc})
       tracked.modified.should == {"name"=>"MongoDB Listing 1", "location_id"=>@location2.id, "location_name"=>@location2.name}
       tracked.changeset.should == {"name"=>["MongoDB Listing", "MongoDB Listing 1"], "location_id"=>[@location1.id, @location2.id], "location_name"=>[@location1.name, @location2.name]}
     end
@@ -100,7 +100,7 @@ describe "Belongs To Association" do
       tracked = @listing.history_tracks.last
       tracked.should be_present
       tracked.association_chain.should == [{"id"=>@listing.id, "name"=>"ListingInclude"}]
-      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "location_priority"=>@location1.priority})
+      tracked.original.should be_equal({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "location_priority"=>@location1.priority, "created_at"=>@listing.created_at.utc, "updated_at"=>@listing.updated_at.utc})
       tracked.modified.should == {}
       tracked.changeset.should == {}
       tracked.action.should   == "destroy"
@@ -113,7 +113,7 @@ describe "Belongs To Association" do
 
       tracked = @listing.history_tracks.last
       tracked.should be_present
-      tracked.original.should include({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name})
+      tracked.original.should be_equal({"id"=>@listing.id, "name"=>"MongoDB Listing", "description"=>"Document Database", "is_active"=>true, "view_count"=>101, "location_id"=>@location1.id, "location_name"=>@location1.name, "created_at"=>@listing.created_at.utc, "updated_at"=>@listing.updated_at.utc})
       tracked.modified.should == {}
       tracked.changeset.should == {}
     end

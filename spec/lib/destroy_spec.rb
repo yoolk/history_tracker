@@ -16,7 +16,7 @@ describe 'Tracking changes when destroy' do
       tracked = listing.history_tracks.last
       tracked.should be_present
       tracked.modifier.should == {"id"=>1, "email"=>"chamnap@yoolk.com"}
-      tracked.original.should include({"id"=>listing.id, "name"=>"MongoDB 102", "view_count"=>102})
+      tracked.original.should be_equal({"id"=>listing.id, "name"=>"MongoDB 102", "description"=>nil, "is_active"=>nil, "view_count"=>102, "created_at"=>listing.created_at.utc, "updated_at"=>listing.updated_at.utc, "location_id"=>nil})
       tracked.modified.should == {}
       tracked.changeset.should == {}
       tracked.action.should   == "destroy"
@@ -36,14 +36,14 @@ describe 'Tracking changes when destroy' do
       listing.destroy
 
       listing.history_tracks.last.modified.should == {}
-      listing.history_tracks.last.original.should include({"id"=>listing.id, "name"=>"MongoDB 101", "view_count"=>101})
+      listing.history_tracks.last.original.should be_equal({"id"=>listing.id, "name"=>"MongoDB 101", "created_at"=>listing.created_at.utc, "updated_at"=>listing.updated_at.utc})
     end
 
     it 'should track changes with :except options' do
       listing = ListingExcept.create!(name: 'MongoDB 101', view_count: 101)
       listing.destroy
 
-      listing.history_tracks.last.original.should include({"id"=>listing.id, "name"=>"MongoDB 101", "view_count"=>101})
+      listing.history_tracks.last.original.should be_equal({"id"=>listing.id, "description"=>nil, "is_active"=>nil, "view_count"=>101, "created_at"=>listing.created_at.utc, "updated_at"=>listing.updated_at.utc, "location_id"=>nil})
       listing.history_tracks.last.modified.should == {}
     end
 

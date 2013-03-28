@@ -20,6 +20,32 @@ RSpec.configure do |config|
   end
 end
 
+require 'rspec/expectations'
+
+# be_equal
+RSpec::Matchers.define :be_equal do |expected|
+  match do |actual|
+    expected = expected.stringify_keys.dup
+    if expected.keys.length != actual.keys.length
+      false
+    else
+      diff = expected.diff(actual)
+      if diff.blank?
+        true
+      else
+        result = diff.collect do |k, v|
+          if v.is_a?(Time)
+            (actual[k].to_i - expected[k].to_i) < 2
+          else
+            actual[k] == expected[k]
+          end 
+        end
+        result.all? { |item| item == true }
+      end
+    end
+  end
+end
+
 # Stub current user
 User.create!(id: 1, email: 'chamnap@yoolk.com')
 def current_user

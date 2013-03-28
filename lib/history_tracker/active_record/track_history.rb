@@ -31,8 +31,11 @@ module HistoryTracker
         def track_options!(options)
           options[:scope]   ||= self.name.split('::').last.underscore
           options[:except]  ||= []
+          options[:except]    = options[:except].collect(&:to_s)
           options[:only]    ||= []
+          options[:only]      = options[:only].collect(&:to_s)
           options[:include] ||= []
+          options[:methods] ||= []
 
           class_attribute :history_options, instance_writer: false
           self.history_options = options
@@ -62,7 +65,7 @@ module HistoryTracker
             except = column_names - history_options[:only].flatten.map(&:to_s)
           else
             except = HistoryTracker.ignored_attributes
-            except |= history_options[:except].collect(&:to_s) if history_options[:except]
+            except |= history_options[:except] if history_options[:except]
           end
           self.non_tracked_columns = except
           self.tracked_columns     = column_names - except

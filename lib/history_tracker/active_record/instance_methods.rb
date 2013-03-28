@@ -23,13 +23,12 @@ module HistoryTracker
       def association_chain
         return @association_chain if @association_chain
 
-        scope = history_options[:scope]
-
-        if scope.to_s == self.class.name.split('::').last.underscore
+        history_scope = history_options[:scope]
+        if history_scope.to_s == self.class.name.split('::').last.underscore
           @association_chain = [{ id: id, name: self.class.name }]
         else
-          if self.class.reflect_on_association(history_options[:scope])
-            main = send(scope)
+          if self.class.reflect_on_association(history_scope)
+            main = send(history_scope)
             reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
             @association_chain = case reflection.macro
             when :has_one, :has_many
@@ -47,6 +46,17 @@ module HistoryTracker
       end
 
       private
+      def tracked_original_attributes
+        original = attributes.merge(changed_attributes)
+        only     = history_options[:only] + ['id', 'created_at', 'updated_at']
+
+        if history_options[:only].present?
+          original.select { |k, v| only.include?(k) }
+        else
+          original.except(*history_options[:except])
+        end
+      end
+
       def tracked_attributes_for_create
         original  = {}
         changeset = changes.except(*non_tracked_columns)
@@ -55,35 +65,38 @@ module HistoryTracker
           h[k] = v[1]
           h
         end
-        included  = original_modified_and_changeset_from_include(:create)
+        included  = tracked_attributes_from_include(:create)
 
         [original.merge(included[0]), modified.merge(included[1]), changeset.merge(included[2])]
       end
 
       def tracked_attributes_for_update
-        original  = attributes.merge(changed_attributes).except(*history_options[:except])
+        original  = tracked_original_attributes
         changeset = changes.except(*non_tracked_columns)
         modified  = changeset.inject({}) do |h, pair|
           k,v = pair
           h[k] = v[1]
           h
         end
-        included  = original_modified_and_changeset_from_include(:update)
+        included  = tracked_attributes_from_include(:update)
 
         [original.merge(included[0]), modified.merge(included[1]), changeset.merge(included[2])]
       end
 
       def tracked_attributes_for_destroy
-        original  = attributes.merge(changed_attributes).except(*history_options[:except])
+        original  = tracked_original_attributes
+        history_options[:methods].each do |method|
+          original["#{method}"] = send(method)
+        end
         changeset = {}
         modified  = {}
 
-        included  = original_modified_and_changeset_from_include(:destroy)
+        included  = tracked_attributes_from_include(:destroy)
 
         [original.merge(included[0]), modified.merge(included[1]), changeset.merge(included[2])]
       end
 
-      def original_modified_and_changeset_from_include(method)
+      def tracked_attributes_from_include(method)
         original  = {}
         modified  = {}
         changeset = {}
@@ -91,7 +104,9 @@ module HistoryTracker
         include_reflections.each do |item|
           reflection = item.keys.first
           now        = send(reflection.name)
-          fields     = item.values.first || now.attributes.keys
+          next if now.nil?
+
+          fields     = item.values.first || now.attribute_names
 
           if method == :create
             fields.each do |field|
@@ -107,6 +122,11 @@ module HistoryTracker
                 original[field_name]  = previous.send(field)
                 modified[field_name]  = now.send(field)
                 changeset[field_name] = [previous.send(field), now.send(field)]
+              end
+            else
+              fields.each do |field|
+                field_name = "#{reflection.name}_#{field}"
+                original[field_name]  = now.send(field)
               end
             end
           elsif method == :destroy
