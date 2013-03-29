@@ -87,26 +87,33 @@ describe 'Tracking changes when create' do
       listing = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
 
       expect {
-        listing.create_history_track(:create, listing.previous_changes)
+        listing.create_history_track!(:create, listing.previous_changes)
       }.to change { listing.history_tracks.count }.by(1)
     end
 
     it "should create history_track with different modifier" do
-      listing = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
-      user    = User.create!(id: 1, email: 'chamnapchhorn@gmail.com')
+      listing  = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+      modifier = User.create!(id: 1, email: 'chamnapchhorn@gmail.com').attributes.slice('id', 'email')
+      changes = listing.previous_changes.reject { |k,v| k.in?(['created_at', 'updated_at']) }
 
-      expect {
-        listing.create_history_track(:create, listing.previous_changes, user)
-      }.to change { listing.history_tracks.count }.by(1)
+      listing.create_history_track!(:create, changes, modifier)
+      tracked = listing.history_tracks.last
+      tracked.modifier.should  == modifier
+      tracked.original.should  == {}
+      tracked.modified.should  be_equal({"name"=>"MongoDB 101", "description"=>"Open source document database", "is_active"=>true, "view_count"=>5, "id"=>listing.id})
+      tracked.changeset.should == {"name"=>[nil, "MongoDB 101"], "description"=>[nil, "Open source document database"], "is_active"=>[nil, true], "view_count"=>[nil, 5], "id"=>[nil, listing.id]}
     end
 
     it "should create history_track on :update" do
       listing = ListingNoCallback.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
       listing.update_attributes(name: 'MongoDB 102')
+      changes = listing.previous_changes.reject { |k,v| k.in?(['created_at', 'updated_at']) }
 
-      expect {
-        listing.create_history_track(:update, listing.previous_changes)
-      }.to change { listing.history_tracks.count }.by(1)
+      listing.create_history_track!(:update, changes)
+      tracked = listing.history_tracks.last
+      tracked.original.should  be_equal({"name"=>"MongoDB 101", "description"=>"Open source document database", "is_active"=>true, "view_count"=>5, "created_at"=>listing.created_at.utc, "updated_at"=>listing.updated_at.utc, "id"=>listing.id, "location_id"=>nil})
+      tracked.modified.should  == {"name"=>"MongoDB 102"}
+      tracked.changeset.should == {"name"=>["MongoDB 101", "MongoDB 102"]}
     end
 
     it "should create history_track on :destroy" do
@@ -114,15 +121,44 @@ describe 'Tracking changes when create' do
       listing.destroy
 
       expect {
-        changes = {
-          "name"=>["MongoDB 101", nil],
-          "description"=>["Open source document database", nil],
-          "is_active"=>[true, nil],
-          "view_count"=>[5, nil],
-          "id"=>[4, nil]
-        }
-        listing.create_history_track(:destroy, changes)
+        listing.create_history_track!(:destroy, {})
       }.to change { listing.history_tracks.count }.by(1)
+    end
+  end
+
+  context "with :changeset options" do
+    it "should create record with history_track" do
+      listing = ListingWithChanges.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+
+      tracked = listing.history_tracks.last
+      tracked.modifier.should  == HistoryTracker.current_modifier
+      tracked.original.should  == {}
+      tracked.modified.should  == {"name"=>"MongoDB 101", "description"=>"Open source document database", "is_active"=>true, "view_count"=>5}
+      tracked.changeset.should == {"name"=>[nil, "MongoDB 101"], "description"=>[nil, "Open source document database"], "is_active"=>[nil, true], "view_count"=>[nil, 5]}
+    end
+
+    it "should update record with history_track" do
+      pp      = Location.create!(name: 'Phnom Penh')
+      listing = ListingWithChanges.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+      listing.update_attributes!(name: 'MongoDB 102', location: pp)
+
+      tracked = listing.history_tracks.last
+      tracked.modifier.should  == HistoryTracker.current_modifier
+      tracked.original.should  be_equal({"id"=>listing.id, "name"=>'MongoDB 101', "view_count"=>5, "location_id"=>nil, "is_active"=>true, "description"=>'Open source document database', "created_at"=>listing.created_at.utc, "updated_at"=>listing.updated_at.utc})
+      tracked.modified.should  == {"name"=>"MongoDB 102", "location"=>"Phnom Penh"}
+      tracked.changeset.should == {"name"=>["MongoDB 101", "MongoDB 102"], "location"=>[nil, "Phnom Penh"]}
+    end
+
+    it "should destroy record with history_track" do
+      pp      = Location.create!(name: 'Phnom Penh')
+      listing = ListingWithChanges.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
+      listing.destroy
+
+      tracked = listing.history_tracks.last
+      tracked.modifier.should  == HistoryTracker.current_modifier
+      tracked.original.should  be_equal({"id"=>listing.id, "name"=>'MongoDB 101', "view_count"=>5, "location_id"=>nil, "is_active"=>true, "description"=>'Open source document database', "created_at"=>listing.created_at.utc, "updated_at"=>listing.updated_at.utc})
+      tracked.modified.should  == {}
+      tracked.changeset.should == {}
     end
   end
 end

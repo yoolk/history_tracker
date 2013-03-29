@@ -56,9 +56,41 @@ class ListingOnDestroy < ActiveRecord::Base
   track_history on: [:destroy]
 end
 
+# no callback
 class ListingNoCallback < ActiveRecord::Base
   self.table_name = :listings
   track_history on: []
+end
+
+# custom changes
+class ListingWithChanges < ActiveRecord::Base
+  self.table_name = :listings
+  belongs_to    :location
+  track_history changeset: :history_tracker_changeset
+
+  private
+  def history_tracker_changeset(method)
+    changeset = changes.except(*non_tracked_columns)
+    case method
+    when :create
+      if changeset['location_id'].present?
+        changeset.delete('location_id')
+        changeset['location'] = [nil, location.name]
+      end
+    when :update
+      if location_id_changed?
+        location_was = if location_id_was.present?
+          Location.find(location_id_was)
+        else
+          nil
+        end
+        changeset['location'] = [location_was.try(:name), location.name]
+        changeset.delete('location_id')
+      end
+    end
+
+    changeset
+  end
 end
 
 # :include options

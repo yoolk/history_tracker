@@ -37,6 +37,7 @@ module HistoryTracker
           options[:include] ||= []
           options[:methods] ||= []
           options[:on]      ||= [:create, :update, :destroy]
+          options[:changes] ||= nil
 
           class_attribute :history_options, instance_writer: false
           self.history_options = options

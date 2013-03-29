@@ -45,15 +45,22 @@ module HistoryTracker
         @association_chain
       end
 
-      def create_history_track(method, changes, modifier=HistoryTracker.current_modifier)
-        original, modified = transform_changes(changes)
+      def create_history_track!(method, changeset, modifier=HistoryTracker.current_modifier)
+        original = tracked_original_attributes
+        modified = {}
+        changeset.each do |k, pair|
+          original[k] = pair[0] if original.key?(k)
+          modified[k] = pair[1]
+        end
+
         tracked_attributes = {
+          modifier:          modifier,
           association_chain: association_chain,
           scope:             history_options[:scope].to_s,
           action:            method,
-          original:          original,
-          modified:          modified,
-          changeset:         (method.to_s == 'destroy') ? {} : changes
+          original:          (method.to_s == 'create') ? {} : original,
+          changeset:         (method.to_s == 'destroy') ? {} : changeset,
+          modified:          modified
         }
 
         begin
@@ -64,18 +71,6 @@ module HistoryTracker
       end
 
       private
-      def transform_changes(changes)
-        original = {}
-        modified = {}
-        changes.each_pair do |k, v|
-          o, m = v
-          original[k] = o unless o.nil?
-          modified[k] = m unless m.nil?
-        end
-
-        [ original, modified ]
-      end
-
       def tracked_original_attributes
         original = attributes.merge(changed_attributes)
         only     = history_options[:only] + ['id', 'created_at', 'updated_at']
@@ -213,10 +208,14 @@ module HistoryTracker
 
       def write_history_track(method)
         begin
-          tracked_attributes = tracked_attributes_for(method)
-          return if method.in?([:create, :update]) and tracked_attributes[:modified].blank? and tracked_attributes[:changeset].blank?
+          if changeset_lambda = history_options[:changeset]
+            create_history_track!(method, send(changeset_lambda, method))
+          else
+            tracked_attributes = tracked_attributes_for(method)
+            return if method.in?([:create, :update]) and tracked_attributes[:modified].blank? and tracked_attributes[:changeset].blank?
 
-          history_class.create!(tracked_attributes)
+            history_class.create!(tracked_attributes)
+          end
         rescue
           errors.add(:base, 'could not save in the history tracker') and raise
         end
