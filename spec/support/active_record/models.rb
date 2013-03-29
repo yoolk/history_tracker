@@ -71,25 +71,20 @@ class ListingWithChanges < ActiveRecord::Base
   private
   def history_tracker_changeset(method)
     changeset = changes.except(*non_tracked_columns)
-    case method
-    when :create
-      if changeset['location_id'].present?
-        changeset.delete('location_id')
-        changeset['location'] = [nil, location.name]
-      end
-    when :update
-      if location_id_changed?
-        location_was = if location_id_was.present?
-          Location.find(location_id_was)
-        else
-          nil
-        end
-        changeset['location'] = [location_was.try(:name), location.name]
-        changeset.delete('location_id')
-      end
+    if location_id_changed?    
+      changeset['location'] = [location_was.try(:name), location.name]
+      changeset.delete('location_id')
     end
 
     changeset
+  end
+
+  def location_was
+    if location_id_was.present?
+      Location.find(location_id_was)
+    else
+      nil
+    end
   end
 end
 

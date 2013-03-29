@@ -49,7 +49,7 @@ module HistoryTracker
         original = tracked_original_attributes
         modified = {}
         changeset.each do |k, pair|
-          original[k] = pair[0] if original.key?(k)
+          original[k] = pair[0]
           modified[k] = pair[1]
         end
 
