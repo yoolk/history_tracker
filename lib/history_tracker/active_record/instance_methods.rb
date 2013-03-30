@@ -39,7 +39,7 @@ module HistoryTracker
           elsif history_options[:association_chain].present?
             @association_chain = history_options[:association_chain].call(self)
           else
-            raise "Couldn't find scope: #{scope}. Please, make sure you define this association." 
+            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association." 
           end
         end
         @association_chain
@@ -49,7 +49,7 @@ module HistoryTracker
         original = tracked_original_attributes
         modified = {}
         changeset.each do |k, pair|
-          original[k] = pair[0]
+          original[k] = pair[0] if original.key?(k)
           modified[k] = pair[1]
         end
 

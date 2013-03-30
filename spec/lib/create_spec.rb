@@ -144,7 +144,7 @@ describe 'Tracking changes when create' do
 
       tracked = listing.history_tracks.last
       tracked.modifier.should  == HistoryTracker.current_modifier
-      tracked.original.should  be_equal({"id"=>listing.id, "name"=>'MongoDB 101', "view_count"=>5, "location_id"=>nil, "is_active"=>true, "description"=>'Open source document database', "created_at"=>listing.created_at.utc, "updated_at"=>listing.updated_at.utc, "location"=>nil})
+      tracked.original.should  be_equal({"id"=>listing.id, "name"=>'MongoDB 101', "view_count"=>5, "location_id"=>nil, "is_active"=>true, "description"=>'Open source document database', "created_at"=>listing.created_at.utc, "updated_at"=>listing.updated_at.utc})
       tracked.modified.should  == {"name"=>"MongoDB 102", "location"=>"Phnom Penh"}
       tracked.changeset.should == {"name"=>["MongoDB 101", "MongoDB 102"], "location"=>[nil, "Phnom Penh"]}
     end
