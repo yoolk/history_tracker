@@ -129,7 +129,7 @@ describe 'Tracking changes when create' do
   context "with :changeset options" do
     it "should create record with history_track" do
       listing = ListingWithChanges.create!(name: 'MongoDB 101', description: 'Open source document database', is_active: true, view_count: 5)
-
+      
       tracked = listing.history_tracks.last
       tracked.modifier.should  == HistoryTracker.current_modifier
       tracked.original.should  == {}
