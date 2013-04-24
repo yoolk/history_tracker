@@ -27,17 +27,17 @@ module HistoryTracker
         if history_scope.to_s == self.class.name.split('::').last.underscore
           @association_chain = [{ id: id, name: self.class.name }]
         else
-          if self.class.reflect_on_association(history_scope)
+          if history_options[:association_chain].present?
+            @association_chain = history_options[:association_chain].call(self)
+          elsif self.class.reflect_on_association(history_scope)
             main = send(history_scope)
             reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
             @association_chain = case reflection.macro
-            when :has_one, :has_many
+            when :belongs_to, :has_one, :has_many
               [ { id: main.id, name: main.class.name }, { id: id, name: reflection.name.to_s } ]
             else
               # TODO:
             end
-          elsif history_options[:association_chain].present?
-            @association_chain = history_options[:association_chain].call(self)
           else
             raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association." 
           end
@@ -50,7 +50,7 @@ module HistoryTracker
         modified = {}
         changeset.each do |k, pair|
           original[k] = pair[0] if original.key?(k)
-          modified[k] = pair[1]
+          modified[k] = pair[1] if pair[1].present?
         end
 
         tracked_attributes = {
@@ -211,7 +211,7 @@ module HistoryTracker
           if changeset_lambda  = history_options[:changeset]
             tracked_attributes = send(changeset_lambda, method)
             return if method.in?([:create, :update]) and tracked_attributes.blank?
-
+            
             create_history_track!(method, tracked_attributes)
           else
             tracked_attributes = tracked_attributes_for(method)
