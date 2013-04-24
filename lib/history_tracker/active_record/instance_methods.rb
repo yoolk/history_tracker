@@ -209,7 +209,7 @@ module HistoryTracker
       def write_history_track(method)
         begin
           if changeset_lambda  = history_options[:changeset]
-            tracked_attributes = send(changeset_lambda, method)
+            tracked_attributes = send(changeset_lambda, method).delete_if { |field, value| value[0].blank? and value[1].blank? }
             return if method.in?([:create, :update]) and tracked_attributes.blank?
             
             create_history_track!(method, tracked_attributes)
