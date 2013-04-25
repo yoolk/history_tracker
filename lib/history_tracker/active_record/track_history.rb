@@ -7,7 +7,8 @@ module HistoryTracker
         def track_history(options = {})
           return if track?
 
-          delegate :track_history?, :to => 'self.class'
+          delegate  :track_history?, :tracked_columns, :non_tracked_columns,
+                    to: 'self.class'
           class_attribute :track_history_per_model, instance_writer: false
           self.track_history_per_model = true
 
@@ -21,10 +22,26 @@ module HistoryTracker
           self.included_modules.include?(HistoryTracker::ActiveRecord::InstanceMethods)
         end
 
+        def tracked_columns
+          @tracked_columns ||= (column_names - non_tracked_columns)
+        end
+
+        def non_tracked_columns
+          return @non_tracked_columns if @non_tracked_columns
+
+          if history_options[:only].present?
+            except = column_names - history_options[:only].flatten.map(&:to_s)
+          else
+            except = HistoryTracker.ignored_attributes
+            except |= history_options[:except] if history_options[:except]
+          end
+          
+          @non_tracked_columns = except
+        end
+
         private
         def setup_tracking!(options)
           track_options!(options)
-          track_column!
           track_callback!
         end
 
@@ -57,20 +74,6 @@ module HistoryTracker
           end
           class_attribute :include_reflections
           self.include_reflections = include_reflections
-        end
-
-        def track_column!
-          class_attribute :tracked_columns, instance_writer: false
-          class_attribute :non_tracked_columns, instance_writer: false
-
-          if history_options[:only].present?
-            except = column_names - history_options[:only].flatten.map(&:to_s)
-          else
-            except = HistoryTracker.ignored_attributes
-            except |= history_options[:except] if history_options[:except]
-          end
-          self.non_tracked_columns = except
-          self.tracked_columns     = column_names - except
         end
 
         def track_callback!
