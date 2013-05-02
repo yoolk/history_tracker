@@ -60,7 +60,7 @@ module HistoryTracker
           action:            method,
           original:          (method.to_s == 'create') ? {} : original,
           changeset:         (method.to_s == 'destroy') ? {} : changeset,
-          modified:          modified
+          modified:          (method.to_s == 'destroy') ? {} : modified
         }
 
         begin
