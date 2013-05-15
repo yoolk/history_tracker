@@ -7,9 +7,9 @@ module HistoryTracker
         include ::Mongoid::Document
         include ::Mongoid::Timestamps
 
-        index(scope: 1)
-        index(association_chain: 1)
-        index(modifier_id: 1)
+        index({ scope: 1 }, { background: true })
+        index({ association_chain: 1 }, { background: true })
+        index({ modifier_id: 1 }, { background: true })
       
         field :scope,             type: String
         field :association_chain, type: Array,   default: []
@@ -20,7 +20,8 @@ module HistoryTracker
         field :action,            type: String
 
         validates :scope, :association_chain, :action, presence: true
-        validate :validate_original_modified_and_changeset
+        validates :action, inclusion: { in: [ 'create', 'update', 'destroy' ] }
+        validate  :validate_original_modified_and_changeset
 
         scope :recent, lambda { order_by(:created_at.desc) }
         scope :updated, lambda { where(action: 'update') }
