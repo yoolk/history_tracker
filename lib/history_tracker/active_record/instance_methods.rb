@@ -64,7 +64,7 @@ module HistoryTracker
         }
 
         begin
-          history_class.create!(tracked_attributes)
+          history_class.with(safe: false).create!(tracked_attributes)
         rescue
           errors.add(:base, 'could not save in the history tracker') and raise
         end
@@ -217,7 +217,7 @@ module HistoryTracker
             tracked_attributes = tracked_attributes_for(method)
             return if method.in?([:create, :update]) and tracked_attributes[:modified].blank? and tracked_attributes[:changeset].blank?
 
-            history_class.create!(tracked_attributes)
+            history_class.with(safe: false).create!(tracked_attributes)
           end
         rescue
           errors.add(:base, 'could not save in the history tracker') and raise
