@@ -35,6 +35,10 @@ module HistoryTracker
         self.track_history_per_model = true
       end
 
+      def enabled=(value)
+        self.track_history_per_model = value
+      end
+
       def without_tracking
         tracking_was_enabled = self.track_history_per_model
         disable_tracking

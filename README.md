@@ -37,10 +37,11 @@ However, you can specify the history class name with `:class_name` options. All 
 
 #### #current_user method name
 
-By default, this gem will invoke `current_user` method and save its id and attributes on each change. However, you can change it by sets the `current_user_method` using a Rails initializer.
+By default, this gem will invoke `current_user` method and save its attributes on each change. However, you can change it by sets the `current_user_method` and `current_user_fields` using a Rails initializer.
 
     # config/initializers/history_tracker.rb
     HistoryTracker.current_user_method = :authenticated_user
+    HistroyTracker.current_user_fields = [:id, :email]
 
     # Assume that authenticated_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
     >> listing = Listing.first
@@ -155,14 +156,20 @@ For example, you might want to disable tracking in your Rails application's test
       HistoryTracker.enabled = false
     end
 
+If you want to disable tracking inside `rails console` or `rake` script, add this:
+
+    if defined?(Rails::Console) or File.basename($0) == "rake"
+      HistoryTracker.enabled = false
+    end
+
 #### Per class
 
-If you are about change some widgets and you don't want to track your changes, you can disable tracking like this:
+If you are about change some widgets and you don't want to track your changes, you can disable/enable tracking like this:
+
+    >> Listing.enabled = false
+    >> Listing.enabled = true
 
     >> Listing.disable_tracking
-
-And enable back like this:
-
     >> Listing.enable_tracking
 
 #### Per method call
@@ -175,6 +182,26 @@ Or a block:
 
     @listing.without_tracking do
       @listing.update_attributes :name => 'New Listing 1'
+    end
+
+#### Rails Controller
+
+If your `ApplicationController` has a `current_user` method, HistoryTracker will invoke this method and store in the `modifier` field. Note that this column is a hash.
+
+You may want HistoryTracker to call a different method to find out who is responsible. To do so, override the `user_for_history_tracker` method in your controller like this:
+
+    class ApplicationController
+      def user_for_history_tracker
+        logged_in? ? current_member : {}  # or whatever
+      end
+    end
+
+You may want to disable HistoryTracker in some controllers. To do that, override the `set_history_tracker_enabled_for_controller` method in your controller like this:
+
+    class ListingController
+      def set_history_tracker_enabled_for_controller
+        false
+      end
     end
 
 ## Authors
