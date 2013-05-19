@@ -204,6 +204,17 @@ You may want to disable HistoryTracker in some controllers. To do that, override
       end
     end
 
+It's possible to track custom operation with `create_history_track!`. It's good for complex relation or custom attributes.
+
+    class ListingController
+      def upload_logo
+        logo_url = @listing.logo_url
+        if @listing.upload_logo(params)
+          @portal.create_history_track!(:update, logo_url: [logo_url, @listing.logo_url])
+        end
+      end
+    end
+
 ## Authors
 
 * [Chamnap Chhorn](https://github.com/chamnap)
