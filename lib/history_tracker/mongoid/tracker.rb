@@ -9,8 +9,8 @@ module HistoryTracker
 
         index({ scope: 1 }, { background: true })
         index({ association_chain: 1 }, { background: true })
-        index({ modifier_id: 1 }, { background: true })
-      
+        index({ modifier: 1 }, { background: true })
+
         field :scope,             type: String
         field :association_chain, type: Array,   default: []
         field :modifier,          type: Hash,    default: {}
@@ -29,7 +29,7 @@ module HistoryTracker
 
         def self.recent_updated_since(time)
           recent.updated.since(time)
-        end  
+        end
 
         private
         def validate_original_modified_and_changeset
