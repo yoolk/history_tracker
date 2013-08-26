@@ -1,10 +1,10 @@
 module HistoryTracker
   module ActiveRecord
     module InstanceMethods
-      def history_tracks
+      def history_tracks(options = {})
+        scope = options[:scope] ||= false
         history_class.where(
-          'association_chain' => { '$all' => association_chain }, 
-          'scope' => history_options[:scope]
+          build_query_conditions(scope)
         )
       end
       
@@ -57,6 +57,7 @@ module HistoryTracker
           modifier:          modifier,
           association_chain: association_chain,
           scope:             history_options[:scope].to_s,
+          type:              association_chain.last[:name],
           action:            method,
           original:          (method.to_s == 'create') ? {} : original,
           changeset:         (method.to_s == 'destroy') ? {} : changeset,
@@ -169,6 +170,7 @@ module HistoryTracker
         tracked_attributes_hash = {
           association_chain: association_chain,
           scope:             history_options[:scope].to_s,
+          type:              association_chain.last[:name],
           action:            method,
           modifier:          HistoryTracker.current_modifier
         }
@@ -219,10 +221,54 @@ module HistoryTracker
 
             history_class.create!(tracked_attributes)
           end
+          # create_history_track!(method, tracked_attributes)
         rescue
           errors.add(:base, 'could not save in the history tracker') and raise
         end
       end
+
+      def build_query_conditions(scope)
+        history_scope = history_options[:scope]
+        association_chain = if history_scope.to_s == self.class.name.split('::').last.underscore
+          single_association_chain
+        else
+          if history_options[:association_chain].present?
+            custom_assciation_chains
+          elsif self.class.reflect_on_association(history_scope)
+            multi_association_chains
+          else
+            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association." 
+          end
+        end
+
+        if scope
+          association_chain['scope'] = history_options[:scope]
+        else
+          association_chain['type'] = association_chain['association_chain.name']
+        end
+        association_chain
+      end
+
+      def single_association_chain
+        { 'association_chain.id'   => id, 'association_chain.name' => self.class.name }
+      end
+
+      def multi_association_chains
+        main = send(history_options[:scope])
+        reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
+        association_chain = case reflection.macro
+        when :belongs_to, :has_one, :has_many
+          { 'association_chain.id' => id, 'association_chain.name' => reflection.name.to_s }
+        else
+          {}
+        end
+      end
+
+      def custom_assciation_chains
+        association_chain = history_options[:association_chain].call(self).last
+        { 'association_chain.id'   => association_chain[:id], 'association_chain.name' => association_chain[:name] }
+      end
+
     end
   end
 end

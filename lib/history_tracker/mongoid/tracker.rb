@@ -8,7 +8,8 @@ module HistoryTracker
         include ::Mongoid::Timestamps
 
         index({ scope: 1 }, { background: true })
-        index({ association_chain: 1 }, { background: true })
+        index({ type: 1 }, { background: true })
+        index({ 'association_chain.id' => 1,  'association_chain.name' => 1}, { background: true })
         index({ modifier: 1 }, { background: true })
 
         field :scope,             type: String
@@ -17,9 +18,10 @@ module HistoryTracker
         field :original,          type: Hash,    default: {}
         field :modified,          type: Hash,    default: {}
         field :changeset,         type: Hash,    default: {}
+        field :type,              type: String
         field :action,            type: String
 
-        validates :scope, :association_chain, :action, presence: true
+        validates :scope, :association_chain, :action, :type, presence: true
         validates :action, inclusion: { in: [ 'create', 'update', 'destroy' ] }
         validate  :validate_original_modified_and_changeset
 
