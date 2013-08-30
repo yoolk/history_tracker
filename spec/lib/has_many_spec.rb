@@ -14,22 +14,23 @@ describe "Has Many Association" do
       comment = listing.comments.create!(title: 'Good Listing', body: 'Awesome')
 
       tracked = comment.history_tracks.last
-      tracked.should be_present
-      tracked.association_chain.should == [{"id"=>listing.id, "name"=>"Listing"},{"id"=>comment.id, "name"=>"comments"}]
-      tracked.modifier.should == {"id"=>1, "email"=>"chamnap@yoolk.com"}
-      tracked.original.should == {}
-      tracked.modified.should == {"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id}
-      tracked.action.should   == "create"
-      tracked.scope.should    == "listing"
+      expect(tracked).to be_present
+      expect(tracked.association_chain).to eq([{"id"=>listing.id, "name"=>"Listing"},{"id"=>comment.id, "name"=>"comments"}])
+      expect(tracked.modifier).to eq({"id"=>1, "email"=>"chamnap@yoolk.com"})
+      expect(tracked.original).to eq({})
+      expect(tracked.modified).to eq({"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id})
+      expect(tracked.action).to   eq("create")
+      expect(tracked.scope).to    eq("listing")
+      expect(tracked.type).to     eq("comments")
     end
 
     it "should retrieve changes from parent" do
       comment = listing.comments.create!(title: 'Good Listing', body: 'Awesome')
 
       history_tracks = listing.history_tracks(scope: true)
-      expect(history_tracks.count) == 2
-      expect(history_tracks[0].modified) == {"name"=>"MongoDB 101", "view_count"=>101}
-      expect(history_tracks[1].modified) == {"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id}
+      expect(history_tracks.count).to eq(2)
+      expect(history_tracks[0].modified).to eq({"name"=>"MongoDB 101", "view_count"=>101})
+      expect(history_tracks[1].modified).to eq({"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id})
     end
   end
 
@@ -47,9 +48,9 @@ describe "Has Many Association" do
       comment.update_attributes!(title: 'Awesome Listing', body: 'Awesome Author')
 
       history_tracks = comment.history_tracks
-      expect(history_tracks.count) == 2
-      expect(history_tracks[0].modified) == {"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id}
-      expect(history_tracks[1].modified) == {"title"=>"Awesome Listing", "body"=>"Awesome Author"}
+      expect(history_tracks.count).to eq(2)
+      expect(history_tracks[0].modified).to eq({"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id})
+      expect(history_tracks[1].modified).to eq({"title"=>"Awesome Listing", "body"=>"Awesome Author"})
     end
 
     it "should retrieve changes from parent" do
@@ -57,10 +58,10 @@ describe "Has Many Association" do
       comment.update_attributes!(title: 'Awesome Listing', body: 'Awesome Author')
 
       history_tracks = listing.history_tracks(scope: true)
-      expect(history_tracks.count) == 3
-      expect(history_tracks[0].modified) == {"name"=>"MongoDB 101", "view_count"=>101}
-      expect(history_tracks[1].modified) == {"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id}
-      expect(history_tracks[2].modified) == {"title"=>"Awesome Listing", "body"=>"Awesome Author"}
+      expect(history_tracks.count).to eq(3)
+      expect(history_tracks[0].modified).to eq({"name"=>"MongoDB 101", "view_count"=>101})
+      expect(history_tracks[1].modified).to eq({"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id})
+      expect(history_tracks[2].modified).to eq({"title"=>"Awesome Listing", "body"=>"Awesome Author"})
     end
   end
 
@@ -78,9 +79,9 @@ describe "Has Many Association" do
       comment.destroy
 
       history_tracks = comment.history_tracks(scope: true)
-      expect(history_tracks.count) == 2
-      expect(history_tracks[0].modified) == {"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id}
-      expect(history_tracks[1].modified) == {}
+      expect(history_tracks.count).to eq(2)
+      expect(history_tracks[0].modified).to eq({"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id})
+      expect(history_tracks[1].modified).to eq({})
     end
 
     it "should retrieve changes from parent" do
@@ -88,10 +89,10 @@ describe "Has Many Association" do
       comment.destroy
 
       history_tracks = listing.history_tracks(scope: true)
-      expect(history_tracks.count) == 3
-      expect(history_tracks[0].modified) == {"name"=>"MongoDB 101", "view_count"=>101}
-      expect(history_tracks[1].modified) == {"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id}
-      expect(history_tracks[2].modified) == {}
+      expect(history_tracks.count).to eq(3)
+      expect(history_tracks[0].modified).to eq({"name"=>"MongoDB 101", "view_count"=>101})
+      expect(history_tracks[1].modified).to eq({"title"=>"Good Listing", "body"=>"Awesome", "listing_id"=>listing.id})
+      expect(history_tracks[2].modified).to eq({})
     end
 
     it "track changes when parent record is deleted" do
