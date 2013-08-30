@@ -73,6 +73,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> listing = Listing.create(name: 'Listing 1')
     >> track = listing.history_tracks.last
     >> track.scope      #=> listing
+    >> track.type       #=> Listing
     >> track.action     #=> create
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
     >> track.original   #=> {}
@@ -82,6 +83,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> listing.update_attributes(name: 'New Listing 1')
     >> track = listing.history_tracks.last
     >> track.scope      #=> listing
+    >> track.type       #=> Listing
     >> track.action     #=> update
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
     >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
@@ -91,6 +93,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> listing.destroy
     >> track = listing.history_tracks.last
     >> track.scope      #=> listing
+    >> track.type       #=> Listing
     >> track.action     #=> destroy
     >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
     >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
@@ -125,7 +128,16 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> comment = listing.comments.create(body: 'Good listing')
 
     >> comment.history_tracks.count #=> 1
-    >> listing.history_tracks.count #=> 2, including :comments
+    >> listing.history_tracks.count #=> 1, not including :comments
+    >> listing.history_tracks.last.type #=> Listing
+    
+    >> listing.history_tracks(scope: true).count #=> 2, including :comments
+    >> listing.history_tracks.last.type #=> comments
+
+    >> tracks = listing.comments.history_tracks # only comment history tracks
+    >> tracks.count #=> 1
+    >> tracks.first.type #=> comments
+
 
     >> listing.update_attributes(location: siem_reap)
     >> track = listing.history_tracks.last
