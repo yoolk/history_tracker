@@ -4,7 +4,7 @@ HistoryTracker tracks historical changes for any active record models, including
 
 ## Installation
 
-This gem depends on ActiveRecord 3.x and Mongoid 3.x. It's well tested on Ruby 1.9.3 only.
+This gem depends on ActiveRecord 3.x and Mongoid 3.x. It's well tested on Ruby 1.9.3 and 2.0.0 only.
 
     gem 'history_tracker', :git => 'git://github.com/yoolk/history_tracker.git'
 
@@ -61,7 +61,7 @@ HistoryTracker is simple to use. Just call `track_history` to a model to track c
       track_history   :scope      => "listing",                       # scope, default is the underscore version of this model
                       :class_name => "Listing::History"               # specify the tracker class name, default is the newly mongoid class with "::History" suffix
                       :only       => [:name],                         # track only the specified fields
-                      :except     => [],                              # track all fields except the specified fields 
+                      :except     => [],                              # track all fields except the specified fields
                       :on         => [:create, :update, :destroy],    # by default, it tracks all events
                       :include    => [],                              # track :belongs_to association
                       :association_chain => lambda { |record| [] }    # specify association_chain for complex relations
