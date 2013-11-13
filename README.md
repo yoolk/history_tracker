@@ -1,4 +1,4 @@
-# HistoryTracker
+# HistoryTracker [![Build Status](https://travis-ci.org/yoolk/history_tracker.png?branch=master)](https://travis-ci.org/yoolk/history_tracker) [![Code Climate](https://codeclimate.com/repos/527f070ec7f3a35566083437/badges/1e1ed5492aa1f25b3e36/gpa.png)](https://codeclimate.com/repos/527f070ec7f3a35566083437/feed)
 
 HistoryTracker tracks historical changes for any active record models, including its associations, and stores in MongoDB. It achieves this by storing all history tracks in a single collection that you define. Association models are referenced by storing an association path, which is an array of `model_name` and `model_id` fields starting from the top most parent and down to the assoication that should track history.
 
