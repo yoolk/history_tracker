@@ -1,3 +1,6 @@
+require "codeclimate-test-reporter"
+CodeClimate::TestReporter.start
+
 require 'history_tracker'
 require 'pry'
 
@@ -38,7 +41,7 @@ RSpec::Matchers.define :be_equal do |expected|
             (actual[k].to_i - expected[k].to_i) < 2
           else
             actual[k] == expected[k]
-          end 
+          end
         end
         result.all? { |item| item == true }
       end
