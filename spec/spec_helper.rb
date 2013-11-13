@@ -32,7 +32,7 @@ RSpec::Matchers.define :be_equal do |expected|
     if expected.keys.length != actual.keys.length
       false
     else
-      diff = expected.diff(actual)
+      diff = diff(expected, actual)
       if diff.blank?
         true
       else
@@ -47,6 +47,13 @@ RSpec::Matchers.define :be_equal do |expected|
       end
     end
   end
+end
+
+# Hash#diff is depreciated in rails 4
+def diff(h1,h2)
+  h1.dup.delete_if { |k, v|
+    h2[k] == v
+  }.merge!(h2.dup.delete_if { |k, v| h1.has_key?(k) })
 end
 
 # Stub current user

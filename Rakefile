@@ -6,4 +6,22 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
-task :default => "spec"
+task :default => "spec:all"
+
+namespace :spec do
+  %w(active_record_40 active_record_32).each do |gemfile|
+    desc "Run Tests against #{gemfile}"
+    task gemfile do
+      sh "BUNDLE_GEMFILE='gemfiles/#{gemfile}.gemfile' bundle --quiet"
+      sh "BUNDLE_GEMFILE='gemfiles/#{gemfile}.gemfile' bundle exec rake spec"
+    end
+  end
+
+  desc "Run Tests against active_record versions"
+  task :all do
+    %w(active_record_40 active_record_32).each do |gemfile|
+      sh "BUNDLE_GEMFILE='gemfiles/#{gemfile}.gemfile' bundle --quiet"
+      sh "BUNDLE_GEMFILE='gemfiles/#{gemfile}.gemfile' bundle exec rake spec"
+    end
+  end
+end
