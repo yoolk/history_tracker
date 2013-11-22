@@ -4,5 +4,6 @@ gem 'activerecord', '~> 4.0.1', require: 'active_record'
 gem "mongoid", github: 'mongoid/mongoid', branch: 'master'
 
 gem "codeclimate-test-reporter", group: :test, require: nil
+gem "coveralls", require: false
 
 gemspec :path => '../'
