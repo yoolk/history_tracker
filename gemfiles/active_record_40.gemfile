@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'activerecord', '~> 4.0.1', require: 'active_record'
-gem "mongoid", "=> 4.0.0.alpha1"
+gem "mongoid", ">= 4.0.0.alpha1"
 
 gem "codeclimate-test-reporter", group: :test, require: nil
 gem "coveralls", require: false
