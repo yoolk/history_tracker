@@ -18,9 +18,10 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_development_dependency "pry", "~> 0.9.12"
-  gem.add_development_dependency "rspec", "~> 2.12.0"
+  gem.add_development_dependency "rspec", "~> 2.14.1"
   gem.add_development_dependency "sqlite3", "~> 1.3.7"
+  gem.add_development_dependency "rake", "~> 10.1.0"
 
-  gem.add_dependency "activerecord", "~> 3.2.12"
-  gem.add_dependency "mongoid", "~> 3.1.1"
+  gem.add_dependency "activerecord", ">= 3.2.15"
+  gem.add_dependency "mongoid", ">= 3.1.5"
 end

@@ -1,3 +1,17 @@
+require "simplecov"
+require "coveralls"
+require "codeclimate-test-reporter"
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  Coveralls::SimpleCov::Formatter,
+  SimpleCov::Formatter::HTMLFormatter,
+  CodeClimate::TestReporter::Formatter
+]
+
+SimpleCov.start do
+  add_filter "/spec/"
+end
+
 require 'history_tracker'
 require 'pry'
 
@@ -29,7 +43,7 @@ RSpec::Matchers.define :be_equal do |expected|
     if expected.keys.length != actual.keys.length
       false
     else
-      diff = expected.diff(actual)
+      diff = diff(expected, actual)
       if diff.blank?
         true
       else
@@ -38,12 +52,19 @@ RSpec::Matchers.define :be_equal do |expected|
             (actual[k].to_i - expected[k].to_i) < 2
           else
             actual[k] == expected[k]
-          end 
+          end
         end
         result.all? { |item| item == true }
       end
     end
   end
+end
+
+# Hash#diff is depreciated in rails 4
+def diff(h1,h2)
+  h1.dup.delete_if { |k, v|
+    h2[k] == v
+  }.merge!(h2.dup.delete_if { |k, v| h1.has_key?(k) })
 end
 
 # Stub current user

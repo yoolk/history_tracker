@@ -61,7 +61,7 @@ HistoryTracker is simple to use. Just call `track_history` to a model to track c
       track_history   :scope      => "listing",                       # scope, default is the underscore version of this model
                       :class_name => "Listing::History"               # specify the tracker class name, default is the newly mongoid class with "::History" suffix
                       :only       => [:name],                         # track only the specified fields
-                      :except     => [],                              # track all fields except the specified fields 
+                      :except     => [],                              # track all fields except the specified fields
                       :on         => [:create, :update, :destroy],    # by default, it tracks all events
                       :include    => [],                              # track :belongs_to association
                       :association_chain => lambda { |record| [] }    # specify association_chain for complex relations
@@ -130,7 +130,7 @@ This gives you a `history_tracks` method which returns historical changes to you
     >> comment.history_tracks.count #=> 1
     >> listing.history_tracks.count #=> 1, not including :comments
     >> listing.history_tracks.last.type #=> Listing
-    
+
     >> listing.history_tracks(scope: true).count #=> 2, including :comments
     >> listing.history_tracks.last.type #=> comments
 

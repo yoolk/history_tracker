@@ -4,5 +4,3 @@ test:
       database: history_tracker
       hosts:
         - localhost:27017
-      options:
-        safe: true
