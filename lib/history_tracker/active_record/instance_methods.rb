@@ -7,7 +7,7 @@ module HistoryTracker
           build_query_conditions(scope)
         )
       end
-      
+
       def history_class
         self.class.history_class
       end
@@ -25,7 +25,7 @@ module HistoryTracker
 
         history_scope = history_options[:scope]
         if history_scope.to_s == self.class.name.split('::').last.underscore
-          @association_chain = [{ id: id, name: self.class.name }]
+          @association_chain = [{ id: id, name: self.class.name.gsub(/^Yoolk::/, "") }]
         else
           if history_options[:association_chain].present?
             @association_chain = history_options[:association_chain].call(self)
@@ -34,12 +34,12 @@ module HistoryTracker
             reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
             @association_chain = case reflection.macro
             when :belongs_to, :has_one, :has_many
-              [ { id: main.id, name: main.class.name }, { id: id, name: reflection.name.to_s } ]
+              [ { id: main.id, name: main.class.name.gsub(/^Yoolk::/, "") }, { id: id, name: reflection.name.to_s } ]
             else
               # TODO:
             end
           else
-            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association." 
+            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association."
           end
         end
         @association_chain
@@ -174,7 +174,7 @@ module HistoryTracker
           action:            method,
           modifier:          HistoryTracker.current_modifier
         }
-        
+
         original, modified, changeset = case method
           when :create
             tracked_attributes_for_create
@@ -183,7 +183,7 @@ module HistoryTracker
           when :destroy
             tracked_attributes_for_destroy
         end
-        
+
         tracked_attributes_hash[:original]  = original
         tracked_attributes_hash[:modified]  = modified
         tracked_attributes_hash[:changeset] = changeset
@@ -198,7 +198,7 @@ module HistoryTracker
 
       def track_update
         return unless track_history?
-        
+
         write_history_track(:update)
       end
 
@@ -213,7 +213,7 @@ module HistoryTracker
           if changeset_lambda  = history_options[:changeset]
             tracked_attributes = send(changeset_lambda, method).delete_if { |field, value| value[0].blank? and value[1].blank? }
             return if method.in?([:create, :update]) and tracked_attributes.blank?
-            
+
             create_history_track!(method, tracked_attributes)
           else
             tracked_attributes = tracked_attributes_for(method)
@@ -237,7 +237,7 @@ module HistoryTracker
           elsif self.class.reflect_on_association(history_scope)
             multi_association_chains
           else
-            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association." 
+            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association."
           end
         end
 
