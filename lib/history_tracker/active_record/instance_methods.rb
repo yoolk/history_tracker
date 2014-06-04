@@ -1,13 +1,13 @@
 module HistoryTracker
   module ActiveRecord
     module InstanceMethods
-      def history_tracks
+      def history_tracks(options = {})
+        scope = options[:scope] ||= false
         history_class.where(
-          'association_chain' => { '$all' => association_chain }, 
-          'scope' => history_options[:scope]
+          build_query_conditions(scope)
         )
       end
-      
+
       def history_class
         self.class.history_class
       end
@@ -25,7 +25,7 @@ module HistoryTracker
 
         history_scope = history_options[:scope]
         if history_scope.to_s == self.class.name.split('::').last.underscore
-          @association_chain = [{ id: id, name: self.class.name }]
+          @association_chain = [{ id: id, name: self.class.name.gsub(/^Yoolk::/, "") }]
         else
           if history_options[:association_chain].present?
             @association_chain = history_options[:association_chain].call(self)
@@ -34,12 +34,12 @@ module HistoryTracker
             reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
             @association_chain = case reflection.macro
             when :belongs_to, :has_one, :has_many
-              [ { id: main.id, name: main.class.name }, { id: id, name: reflection.name.to_s } ]
+              [ { id: main.id, name: main.class.name.gsub(/^Yoolk::/, "") }, { id: id, name: reflection.name.to_s } ]
             else
               # TODO:
             end
           else
-            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association." 
+            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association."
           end
         end
         @association_chain
@@ -57,6 +57,7 @@ module HistoryTracker
           modifier:          modifier,
           association_chain: association_chain,
           scope:             history_options[:scope].to_s,
+          type:              association_chain.last[:name],
           action:            method,
           original:          (method.to_s == 'create') ? {} : original,
           changeset:         (method.to_s == 'destroy') ? {} : changeset,
@@ -169,10 +170,11 @@ module HistoryTracker
         tracked_attributes_hash = {
           association_chain: association_chain,
           scope:             history_options[:scope].to_s,
+          type:              association_chain.last[:name],
           action:            method,
           modifier:          HistoryTracker.current_modifier
         }
-        
+
         original, modified, changeset = case method
           when :create
             tracked_attributes_for_create
@@ -181,7 +183,7 @@ module HistoryTracker
           when :destroy
             tracked_attributes_for_destroy
         end
-        
+
         tracked_attributes_hash[:original]  = original
         tracked_attributes_hash[:modified]  = modified
         tracked_attributes_hash[:changeset] = changeset
@@ -196,7 +198,7 @@ module HistoryTracker
 
       def track_update
         return unless track_history?
-        
+
         write_history_track(:update)
       end
 
@@ -211,7 +213,7 @@ module HistoryTracker
           if changeset_lambda  = history_options[:changeset]
             tracked_attributes = send(changeset_lambda, method).delete_if { |field, value| value[0].blank? and value[1].blank? }
             return if method.in?([:create, :update]) and tracked_attributes.blank?
-            
+
             create_history_track!(method, tracked_attributes)
           else
             tracked_attributes = tracked_attributes_for(method)
@@ -219,10 +221,54 @@ module HistoryTracker
 
             history_class.create!(tracked_attributes)
           end
+          # create_history_track!(method, tracked_attributes)
         rescue
           errors.add(:base, 'could not save in the history tracker') and raise
         end
       end
+
+      def build_query_conditions(scope)
+        history_scope = history_options[:scope]
+        association_chain = if history_scope.to_s == self.class.name.split('::').last.underscore
+          single_association_chain
+        else
+          if history_options[:association_chain].present?
+            custom_assciation_chains
+          elsif self.class.reflect_on_association(history_scope)
+            multi_association_chains
+          else
+            raise "Couldn't find scope: #{history_scope}. Please, make sure you define this association."
+          end
+        end
+
+        if scope
+          association_chain['scope'] = history_options[:scope]
+        else
+          association_chain['type'] = association_chain['association_chain.name']
+        end
+        association_chain
+      end
+
+      def single_association_chain
+        { 'association_chain.id'   => id, 'association_chain.name' => self.class.name }
+      end
+
+      def multi_association_chains
+        main = send(history_options[:scope])
+        reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
+        association_chain = case reflection.macro
+        when :belongs_to, :has_one, :has_many
+          { 'association_chain.id' => id, 'association_chain.name' => reflection.name.to_s }
+        else
+          {}
+        end
+      end
+
+      def custom_assciation_chains
+        association_chain = history_options[:association_chain].call(self).last
+        { 'association_chain.id'   => association_chain[:id], 'association_chain.name' => association_chain[:name] }
+      end
+
     end
   end
 end

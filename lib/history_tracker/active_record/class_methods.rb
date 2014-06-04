@@ -23,6 +23,23 @@ module HistoryTracker
         @history_class = klass
       end
 
+      def history_tracks
+        if defined? scoped.proxy_association
+          if scoped.proxy_association.owner.class.name.downcase.to_sym == history_options[:scope]
+            association_chain_name = scoped.proxy_association.owner.class.name
+          else
+            association_chain_name = scoped.proxy_association.owner.class.name.underscore.pluralize
+          end
+
+          history_class.where(
+            { 'association_chain.id'   => scoped.proxy_association.owner.id, 
+              'association_chain.name' => association_chain_name,
+              'type'                   => scoped.proxy_association.reflection.name.to_s
+            }
+          )
+        end
+      end
+
       def track_history?
         HistoryTracker.enabled? and HistoryTracker.enabled_for_controller? and track_history_per_model
       end
@@ -47,5 +64,6 @@ module HistoryTracker
         enable_tracking if tracking_was_enabled
       end
     end
+
   end
 end
