@@ -1,0 +1,6 @@
+test:
+  sessions:
+    default:
+      database: history_tracker
+      hosts:
+        - localhost:27017

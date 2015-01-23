@@ -1,0 +1,3 @@
+# track_history
+modifier_field: :modifier,
+changes_method: :changes,
