@@ -13,6 +13,7 @@ end
 require 'pry'
 require 'mongoid-rspec'
 require 'history_tracker'
+require 'history_tracker/matchers'
 
 # active_record
 load File.dirname(__FILE__) + '/support/active_record/schema.rb'

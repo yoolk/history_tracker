@@ -74,4 +74,18 @@ describe '#track_history' do
       expect(photo.send(:related_scope)).to eq(:album)
     end
   end
+
+  context '#callbacks' do
+    it 'should define callback function #track_update' do
+      expect(Listing.new.private_methods.collect(&:to_sym)).to include(:track_update)
+    end
+
+    it 'should define callback function #track_create' do
+      expect(Listing.new.private_methods.collect(&:to_sym)).to include(:track_create)
+    end
+
+    it 'should define callback function #track_destroy' do
+      expect(Listing.new.private_methods.collect(&:to_sym)).to include(:track_destroy)
+    end
+  end
 end

@@ -4,6 +4,7 @@ require 'active_support/concern'
 module HistoryTracker
   autoload :ActiveRecord,   'history_tracker/active_record'
   autoload :Mongoid,        'history_tracker/mongoid'
+  autoload :Matchers,       'history_tracker/matchers'
 
   class << self
     attr_accessor :ignored_tracked_fields, :trackable_class_options

@@ -15,7 +15,6 @@ describe 'modified_attributes' do
     subject        { listing.send(:modified_attributes_for_update) }
 
     it 'returns changeset which includes only the modified fields' do
-      binding.pry
       listing.assign_attributes(name: 'Listing 2', description: 'Description 2')
 
       expect(subject).to eq({"name"=>["Listing 1", "Listing 2"], "description"=>["Description 1", "Description 2"]})

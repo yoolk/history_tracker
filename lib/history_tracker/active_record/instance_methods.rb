@@ -144,7 +144,7 @@ module HistoryTracker
         end
 
         def clear_trackable_memoization
-          @history_tracker_attributes     =  nil
+          @history_tracker_attributes     = nil
           @modified_attributes_for_create = nil
           @modified_attributes_for_update = nil
           @history_tracks                 = nil

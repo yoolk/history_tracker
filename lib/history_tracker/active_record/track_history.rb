@@ -10,12 +10,13 @@ module HistoryTracker
         #
         # Available options:
         # scope:
-        # except:
         # only:
+        # except:
         # parent:
         # inverse_of:
         # changes_method:
         # on:
+        # class_name:
 
         def track_history(options = {})
           # don't allow multiple calls
