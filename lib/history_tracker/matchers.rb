@@ -3,18 +3,16 @@ module HistoryTracker
     # Ensure that the model is tracked history.
     #
     # Options:
-    # * <tt>scope</tt>
+    # * <tt>class_name</tt>
     # * <tt>only</tt>
     # * <tt>except</tt>
     # * <tt>parent</tt>
     # * <tt>inverse_of</tt>
     # * <tt>changes_method</tt>
     # * <tt>on</tt>
-    # * <tt>class_name</tt>
     #
     # Example:
     #   it { should be_tracked_history }
-    #   it { should be_tracked_history.scope(:scope_name) }
     #   it { should be_tracked_history.only(:field_name) }
     #   it { should be_tracked_history.except(:password) }
     #   it { should be_tracked_history.parent(:listing).inverse_of(:communications) }
@@ -29,11 +27,6 @@ module HistoryTracker
     class TrackedHistoryMatcher
       def initialize
         @options = {}
-      end
-
-      def scope(scope)
-        @options[:scope] = scope
-        self
       end
 
       def only(*fields)
@@ -74,7 +67,6 @@ module HistoryTracker
       def matches?(subject)
         @subject = subject
         tracking_history_enabled? &&
-          scope_options? &&
           parent_options? &&
           inverse_of_options? &&
           only_options? &&
@@ -117,15 +109,6 @@ module HistoryTracker
         def tracking_history_enabled?
           expects "#{model_class} to be tracked history"
           model_class.respond_to?(:track_history?) && model_class.track_history?
-        end
-
-        def scope_options?
-          if @options[:scope]
-            expects "tracked history scope (:#{history_trackable_options[:scope]}) to match (:#{@options[:scope]})"
-            history_trackable_options[:scope] == @options[:scope]
-          else
-            true
-          end
         end
 
         def parent_options?

@@ -69,8 +69,7 @@ HistoryTracker is simple to use. Just call `track_history` to a model to track c
 class Listing < ActiveRecord::Base
 
   # should put below association
-  track_history   :scope      => "listing",                       # scope, default is the underscore version of this model
-                  :class_name => "Listing::History"               # specify the tracker class name, default is the newly mongoid class with "::History" suffix
+  track_history   :class_name => "Listing::History"               # specify the tracker class name, default is the newly mongoid class with "::History" suffix
                   :only       => [:name],                         # track only the specified fields
                   :except     => [],                              # track all fields except the specified fields
                   :on         => [:create, :update, :destroy],    # by default, it tracks all events
@@ -85,7 +84,6 @@ This gives you a `history_tracks` method which returns historical changes to you
 # Assume that current_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
 >> listing = Listing.create(name: 'Listing 1')
 >> track = listing.history_tracks.last
->> track.scope      #=> listing
 >> track.action     #=> create
 >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
 >> track.original   #=> {}
@@ -94,7 +92,6 @@ This gives you a `history_tracks` method which returns historical changes to you
 
 >> listing.update_attributes(name: 'New Listing 1')
 >> track = listing.history_tracks.last
->> track.scope      #=> listing
 >> track.action     #=> update
 >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
 >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
@@ -103,7 +100,6 @@ This gives you a `history_tracks` method which returns historical changes to you
 
 >> listing.destroy
 >> track = listing.history_tracks.last
->> track.scope      #=> listing
 >> track.action     #=> destroy
 >> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
 >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
@@ -130,8 +126,7 @@ end
 class Comment < ActiveRecord::Base
   belongs_to :listing
 
-  track_history  scope:      :listing,           # must have a :belongs_to association
-                 class_name: 'Listing::History'  # for direct relation, it's optional
+  track_history  class_name: 'Listing::History'  # for direct relation, it's optional
 end
 
 >> phnom_penh = Location.create(name: 'Phnom Penh')

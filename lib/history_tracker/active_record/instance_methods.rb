@@ -7,7 +7,7 @@ module HistoryTracker
       end
 
       def history_tracks
-        @history_tracks ||= history_tracker_class.where(scope: related_scope, association_chain: association_hash)
+        @history_tracks ||= history_tracker_class.where(association_hash_query.merge(trackable_class_name: self.class.name))
       end
 
       protected
@@ -38,10 +38,11 @@ module HistoryTracker
           ActiveSupport::OrderedHash['name', name, 'id', node.id]
         end
 
-        def related_scope
-          scope = history_trackable_options[:scope]
-          scope = history_trackable_options[:parent] if history_trackable_parent.present?
-          scope
+        def association_hash_query
+          query = association_hash.inject({}) do |h, (k, v)|
+            h["association_chain.#{k}"] = v
+            h
+          end
         end
 
         # Retrieves the modified attributes for create action
@@ -83,8 +84,8 @@ module HistoryTracker
         #   values for each field
         def modified_attributes_for_action(action)
           case action.to_sym
-          when :destroy then modified_attributes_for_destroy
           when :create then modified_attributes_for_create
+          when :destroy then modified_attributes_for_destroy
           else modified_attributes_for_update
           end
         end
@@ -97,15 +98,13 @@ module HistoryTracker
 
           @history_tracker_attributes = {
             association_chain: traverse_association_chain,
-            scope: related_scope
+            trackable_class_name: self.class.name,
+            modifier_id: HistoryTracker.current_modifier_id
           }
 
-          changeset          = modified_attributes_for_action(action)
-          original, modified = transform_changes(changeset)
-
+          original, modified = transform_changes(modified_attributes_for_action(action))
           @history_tracker_attributes[:original]  = original
           @history_tracker_attributes[:modified]  = modified
-          @history_tracker_attributes[:changeset] = changeset
           @history_tracker_attributes
         end
 

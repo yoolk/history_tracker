@@ -9,10 +9,13 @@ end
 
 describe Album do
   it { should be_tracked_history }
-  it { should be_tracked_history.scope(:listing) }
   it { should be_tracked_history.only(:name) }
   it { should be_tracked_history.parent(:listing) }
   it { should be_tracked_history.inverse_of(:albums) }
   it { should be_tracked_history.on(:create, :update, :destroy) }
+  it { should be_tracked_history.class_name('ListingHistoryTracker') }
+end
+
+describe Photo do
   it { should be_tracked_history.class_name('ListingHistoryTracker') }
 end

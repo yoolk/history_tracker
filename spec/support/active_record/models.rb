@@ -3,7 +3,12 @@ class User < ActiveRecord::Base
 end
 
 # Models
+class Location < ActiveRecord::Base
+  has_many      :listings
+end
+
 class Listing < ActiveRecord::Base
+  belongs_to    :location
   has_many      :albums
   has_many      :photos, through: :albums
 
@@ -14,16 +19,16 @@ class Album < ActiveRecord::Base
   belongs_to    :listing
   has_many      :photos
 
-  track_history scope: :listing,
-                only: :name,
+  track_history only: :name,
                 parent: :listing,
-                inverse_of: :albums
+                inverse_of: :albums,
+                class_name: 'ListingHistoryTracker'
 end
 
 class Photo < ActiveRecord::Base
   belongs_to    :album
 
-  track_history scope: :listing,
-                parent: :album,
-                inverse_of: :photos
+  track_history parent: :album,
+                inverse_of: :photos,
+                class_name: 'ListingHistoryTracker'
 end

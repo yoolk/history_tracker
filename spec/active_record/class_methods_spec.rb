@@ -25,10 +25,6 @@ describe 'ClassMethods' do
       expect(MyListing.history_tracker_class).to eq(ListingHistoryTracker)
     end
 
-    it 'returns tracker_class from :scope' do
-      expect(MyAlbum.history_tracker_class).to eq(ListingHistoryTracker)
-    end
-
     it 'returns tracker_class from deferred' do
       expect(AnotherListing.history_tracker_class).to eq(AnotherListingHistoryTracker)
       expect(AnotherListing.history_tracker_class.collection_name).to eq(:listing_histories)

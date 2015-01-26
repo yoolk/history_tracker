@@ -7,15 +7,15 @@ describe '#track_history' do
 
   context '#history_trackable_options' do
     it 'Listing model' do
-      expect(Listing.history_trackable_options).to eq({:scope=>:listing, :on=>[:create, :update, :destroy], :changes_method=>:changes, :except=>["view_count"], :only=>[]})
+      expect(Listing.history_trackable_options).to eq({:on=>[:create, :update, :destroy], :changes_method=>:changes, :except=>["view_count"], :only=>[]})
     end
 
     it 'Album model' do
-      expect(Album.history_trackable_options).to eq({:scope=>:listing, :on=>[:create, :update, :destroy], :changes_method=>:changes, :only=>["name"], :parent=>:listing, :inverse_of=>:albums, :except=>[]})
+      expect(Album.history_trackable_options).to eq({:on=>[:create, :update, :destroy], :changes_method=>:changes, :only=>["name"], :parent=>:listing, :inverse_of=>:albums, :class_name=>"ListingHistoryTracker", :except=>[]})
     end
 
     it 'Photo model' do
-      expect(Photo.history_trackable_options).to eq({:scope=>:listing, :on=>[:create, :update, :destroy], :changes_method=>:changes, :parent=>:album, :inverse_of=>:photos, :only=>[], :except=>[]})
+      expect(Photo.history_trackable_options).to eq({:on=>[:create, :update, :destroy], :changes_method=>:changes, :parent=>:album, :inverse_of=>:photos, :class_name=>"ListingHistoryTracker", :only=>[], :except=>[]})
     end
   end
 
@@ -58,20 +58,6 @@ describe '#track_history' do
 
     it 'Photo model' do
       expect(photo.send(:association_hash)).to eq({"name"=>"photos", "id"=>photo.id})
-    end
-  end
-
-  context '#related_scope' do
-    it 'Listing model' do
-      expect(listing.send(:related_scope)).to eq(:listing)
-    end
-
-    it 'Album model' do
-      expect(album.send(:related_scope)).to eq(:listing)
-    end
-
-    it 'Photo model' do
-      expect(photo.send(:related_scope)).to eq(:album)
     end
   end
 

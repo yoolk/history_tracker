@@ -12,8 +12,6 @@ module HistoryTracker
         h = history_trackable_options
         if h[:class_name].present?
           klass = h[:class_name].constantize
-        elsif scope_reflection.present?
-          klass = scope_reflection.klass.history_tracker_class
         else
           klass_name  = "#{self.name}HistoryTracker"
           klass       = self.const_get(klass_name) rescue nil
@@ -29,10 +27,6 @@ module HistoryTracker
         end
 
         @history_tracker_class = klass
-      end
-
-      def scope_reflection
-        reflect_on_association(history_trackable_options[:scope])
       end
 
       def tracked_fields

@@ -9,7 +9,6 @@ module HistoryTracker
         # @param [ Hash ] options
         #
         # Available options:
-        # scope:
         # only:
         # except:
         # parent:
@@ -23,7 +22,6 @@ module HistoryTracker
           return if self.included_modules.include?(HistoryTracker::ActiveRecord::InstanceMethods)
 
           default_options = {
-            scope:          table_name.to_s.singularize.to_sym,
             on:             [:create, :update, :destroy],
             changes_method: :changes,
           }
@@ -50,7 +48,10 @@ module HistoryTracker
                           :history_tracker_class, :track_history?,
                           to: 'self.class'
 
-          # after_commit    :test_track
+          # after_commit      :track_create,  on: :create     if options[:on].include?(:create)
+          # after_commit      :track_update,  on: :update     if options[:on].include?(:update)
+          # after_commit      :track_destroy, on: :destroy    if options[:on].include?(:destroy)
+
           after_create    :track_create   if options[:on].include?(:create)
           before_update   :track_update   if options[:on].include?(:update)
           before_destroy  :track_destroy  if options[:on].include?(:destroy)

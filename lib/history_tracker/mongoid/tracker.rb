@@ -8,26 +8,23 @@ module HistoryTracker
         include ::Mongoid::Timestamps
 
         ## Indexes
-        index({ scope: 1 }, { background: true })
         index({ 'association_chain.id' => 1, 'association_chain.name' => 1}, { background: true })
         index({ modifier_id: 1 }, { background: true })
+        index({ trackable_class_name: 1 }, { background: true })
 
         ## Fields
-        field     :scope,             type: String
-        field     :association_chain, type: Array,   default: []
-        field     :original,          type: Hash,    default: {}
-        field     :modified,          type: Hash,    default: {}
-        field     :changeset,         type: Hash,    default: {}
-        field     :action,            type: String
-
-        ## Relations
-        belongs_to :modifier,         class_name: HistoryTracker.modifier_class_name
+        field     :association_chain,     type: Array,   default: []
+        field     :original,              type: Hash,    default: {}
+        field     :modified,              type: Hash,    default: {}
+        field     :action,                type: String
+        field     :modifier_id,           type: String
+        field     :trackable_class_name,  type: String
 
         ## Validations
-        validates :scope, :association_chain, :action,
+        validates :association_chain, :action, :modifier_id, :trackable_class_name,
                                       presence: true
         validates :action,            inclusion: { in: [ 'create', 'update', 'destroy' ] }
-        validate  :validate_original_modified_and_changeset
+        validate  :validate_original_modified
 
         ## Scopes
         scope     :recent,            -> { order_by(:created_at.desc) }
@@ -43,21 +40,21 @@ module HistoryTracker
 
         private
 
-          def validate_original_modified_and_changeset
+          def validate_original_modified
             case action
             when 'create'
               errors.add(:original, 'must be blank')      if original.present?
               errors.add(:modified, 'must not be blank')  if modified.blank?
-              errors.add(:changeset, 'must not be blank') if changeset.blank?
             when 'update'
               errors.add(:original, 'must not be blank')  if original.blank?
               errors.add(:modified, 'must not be blank')  if modified.blank?
-              errors.add(:changeset, 'must not be blank') if changeset.blank?
             when 'destroy'
               errors.add(:original, 'must not be blank')  if original.blank?
               errors.add(:modified, 'must be blank')      if modified.present?
-              errors.add(:changeset, 'must be blank')     if changeset.present?
             end
+
+            ## stringify keys before save and compare
+            errors.add(:base, 'original and modified must not be the same') if original == modified
           end
       end
     end
