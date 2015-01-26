@@ -17,7 +17,7 @@ module HistoryTracker
         field     :original,              type: Hash,    default: {}
         field     :modified,              type: Hash,    default: {}
         field     :action,                type: String
-        field     :modifier_id,           type: String
+        field     :modifier_id,           type: Integer
         field     :trackable_class_name,  type: String
 
         ## Validations
@@ -53,7 +53,6 @@ module HistoryTracker
               errors.add(:modified, 'must be blank')      if modified.present?
             end
 
-            ## stringify keys before save and compare
             errors.add(:base, 'original and modified must not be the same') if original == modified
           end
       end

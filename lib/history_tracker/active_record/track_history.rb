@@ -48,6 +48,7 @@ module HistoryTracker
                           :history_tracker_class, :track_history?,
                           to: 'self.class'
 
+          # http://guides.rubyonrails.org/v4.0.12/active_record_callbacks.html#transaction-callbacks
           # after_commit      :track_create,  on: :create     if options[:on].include?(:create)
           # after_commit      :track_update,  on: :update     if options[:on].include?(:update)
           # after_commit      :track_destroy, on: :destroy    if options[:on].include?(:destroy)

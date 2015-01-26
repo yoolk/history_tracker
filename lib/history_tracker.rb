@@ -39,8 +39,22 @@ module HistoryTracker
       config_store[:enabled_for_controller] = value
     end
 
+    def current_modifier
+      modifier = if config_store[:current_modifier]
+        config_store[:current_modifier]
+      else
+        {}
+      end
+    end
+
     def current_modifier_id
-      '1'
+      current_modifier.try(:id)
+    end
+
+    def current_modifier=(value)
+      return unless value
+
+      config_store[:current_modifier] = value
     end
   end
 
