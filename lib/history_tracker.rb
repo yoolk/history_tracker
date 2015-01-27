@@ -2,9 +2,10 @@ require 'history_tracker/version'
 require 'active_support/concern'
 
 module HistoryTracker
-  autoload :ActiveRecord,   'history_tracker/active_record'
-  autoload :Mongoid,        'history_tracker/mongoid'
-  autoload :Matchers,       'history_tracker/matchers'
+  autoload :ActiveRecord,         'history_tracker/active_record'
+  autoload :Mongoid,              'history_tracker/mongoid'
+  autoload :Matchers,             'history_tracker/matchers'
+  autoload :ControllerAdditions,  'history_tracker/controller_additions'
 
   class << self
     attr_accessor :ignored_tracked_fields, :trackable_class_options, :current_user_method
@@ -64,5 +65,6 @@ end
 
 require 'history_tracker/active_record'
 require 'history_tracker/mongoid'
+require 'history_tracker/controller_additions'
 
 HistoryTracker.trackable_class_options = {}

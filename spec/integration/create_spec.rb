@@ -38,7 +38,7 @@ describe Listing, 'track on create' do
     expect(history_track.trackable_class_name).to eq('Listing')
   end
 
-  it 'shoud have modifier field' do
+  it 'should have modifier field' do
     expect(history_track.modifier_id).to eq(HistoryTracker.current_modifier_id)
   end
 end
@@ -84,7 +84,7 @@ describe Album, 'track on create' do
     expect(history_track.trackable_class_name).to eq('Album')
   end
 
-  it 'shoud have modifier field' do
+  it 'should have modifier field' do
     expect(history_track.modifier_id).to eq(HistoryTracker.current_modifier_id)
   end
 end
@@ -132,7 +132,7 @@ describe Photo, 'track on create' do
     expect(history_track.trackable_class_name).to eq('Photo')
   end
 
-  it 'shoud have modifier field' do
+  it 'should have modifier field' do
     expect(history_track.modifier_id).to eq(HistoryTracker.current_modifier_id)
   end
 end

@@ -10,6 +10,18 @@ module HistoryTracker
         @history_tracks ||= history_tracker_class.where(association_hash_query.merge(trackable_class_name: self.class.name))
       end
 
+      def write_history_track!(action, changes={}, modifier_id=HistoryTracker.current_modifier_id)
+        changes = modified_attributes_for_destroy if action.to_sym == :destroy
+        original, modified = transform_changes(changes)
+
+        tracked_attributes = default_history_tracker_attributes(action, modifier_id)
+        tracked_attributes[:original] = original
+        tracked_attributes[:modified] = modified
+
+        clear_trackable_memoization
+        history_tracker_class.create!(tracked_attributes)
+      end
+
       protected
 
         def track_history_for_action?(action)
@@ -64,12 +76,13 @@ module HistoryTracker
           @modified_attributes_for_update ||= send(history_trackable_options[:changes_method]).select { |k, _| self.class.tracked_field?(k, :update) }
         end
 
+        # Eg: {"name"=>["Listing 1", nil], "description"=> ["Description 1", nil]}
+        def modified_attributes_for_destroy
+          @modified_attributes_for_destroy
+          changes||= attributes.inject({}) do |h, (k, v)|
         # Retrieves the modified attributes for destroy action
         #
         # Returns hash which contains field as key and [value, nil] as value
-        # Eg: {"name"=>["Listing 1", nil], "description"=> ["Description 1", nil]}
-        def modified_attributes_for_destroy
-          @modified_attributes_for_destroy ||= attributes.inject({}) do |h, (k, v)|
             h[k] = [v, nil]
             h
           end.select { |k, _| self.class.tracked_field?(k, :destroy) }
@@ -96,11 +109,7 @@ module HistoryTracker
         def history_tracker_attributes(action)
           return @history_tracker_attributes if @history_tracker_attributes
 
-          @history_tracker_attributes = {
-            association_chain: traverse_association_chain,
-            trackable_class_name: self.class.name,
-            modifier_id: HistoryTracker.current_modifier_id
-          }
+          @history_tracker_attributes = default_history_tracker_attributes(action)
 
           original, modified = transform_changes(modified_attributes_for_action(action))
           @history_tracker_attributes[:original]  = original
@@ -108,6 +117,14 @@ module HistoryTracker
           @history_tracker_attributes
         end
 
+        def default_history_tracker_attributes(action, modifier_id=HistoryTracker.current_modifier_id)
+          {
+            association_chain: traverse_association_chain,
+            trackable_class_name: self.class.name,
+            modifier_id: modifier_id,
+            action: action.to_s
+          }
+        end
 
         # Returns an array of original and modified from changeset
         #
@@ -125,7 +142,7 @@ module HistoryTracker
 
         def track_history_for_action(action)
           if track_history_for_action?(action)
-            history_tracker_class.create!(history_tracker_attributes(action.to_sym).merge(action: action.to_s))
+            history_tracker_class.create!(history_tracker_attributes(action.to_sym))
           end
           clear_trackable_memoization
         end
