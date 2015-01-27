@@ -1,8 +1,6 @@
 # HistoryTracker [![Build Status](https://travis-ci.org/yoolk/history_tracker.png?branch=master)](https://travis-ci.org/yoolk/history_tracker) [![Code Climate](https://codeclimate.com/repos/527f070ec7f3a35566083437/badges/1e1ed5492aa1f25b3e36/gpa.png)](https://codeclimate.com/repos/527f070ec7f3a35566083437/feed) [![Dependency Status](https://gemnasium.com/yoolk/history_tracker.png)](https://gemnasium.com/yoolk/history_tracker) [![Coverage Status](https://coveralls.io/repos/yoolk/history_tracker/badge.png?branch=master)](https://coveralls.io/r/yoolk/history_tracker?branch=master)
 
-HistoryTracker is inspired by [mongoid-history](https://github.com/aq1018/mongoid-history) and [audited](https://github.com/collectiveidea/audited).
-
-HistoryTracker tracks historical changes for any active record models, including its associations, and stores in MongoDB. It achieves this by storing all history tracks in a single collection that you define. Association models are referenced by storing an association path, which is an array of `model_name` and `model_id` fields starting from the top most parent and down to the assoication that should track history.
+**HistoryTracker** is inspired by [mongoid-history](https://github.com/aq1018/mongoid-history) and [audited](https://github.com/collectiveidea/audited). **HistoryTracker** tracks historical changes for any active record models, including its associations, and stores in MongoDB. It achieves this by storing all history tracks in a single collection that you define. Association models are referenced by storing an association path, which is an array of `model_name` and `model_id` fields starting from the top most parent and down to the assoication that should track history.
 
 ## Installation
 
@@ -50,13 +48,11 @@ By default, this gem will invoke `current_user` method and save its attributes o
 ```ruby
 # config/initializers/history_tracker.rb
 HistoryTracker.current_user_method = :authenticated_user
-HistroyTracker.current_user_fields = [:id, :email]
 
 # Assume that authenticated_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
 >> listing = Listing.first
->> listing.update_attributes(name: 'New Name')
+>> listing.update_attributes!(name: 'New Name')
 
->> listing.history_tracks.last.modifier    #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
 >> listing.history_tracks.last.modifier_id #=> 1
 ```
 
@@ -69,12 +65,13 @@ HistoryTracker is simple to use. Just call `track_history` to a model to track c
 class Listing < ActiveRecord::Base
 
   # should put below association
-  track_history   :class_name => "Listing::History"               # specify the tracker class name, default is the newly mongoid class with "::History" suffix
-                  :only       => [:name],                         # track only the specified fields
-                  :except     => [],                              # track all fields except the specified fields
-                  :on         => [:create, :update, :destroy],    # by default, it tracks all events
-                  :include    => [],                              # track :belongs_to association
-                  :association_chain => lambda { |record| [] }    # specify association_chain for complex relations
+  track_history   class_name:     'ListingHistoryTracker'          # specify the tracker class name, default is the newly mongoid class with "HistoryTracker" suffix
+                  only:           [:name],                         # track only the specified fields
+                  except:         [],                              # track all fields except the specified fields
+                  on:             [:create, :update, :destroy],    # by default, it tracks all events
+                  changes_method: :changes,                        # alternate changes method
+                  parent:         nil,
+                  inverse_of:     nil
 end
 ```
 
@@ -231,7 +228,7 @@ class ListingController
 end
 ```
 
-It's possible to track custom operation with `create_history_track!`. It's good for complex relation or custom attributes.
+It's possible to track custom operation with `write_history_track!`. It's good for complex relation or custom attributes.
 
 ```ruby
 class ListingController
