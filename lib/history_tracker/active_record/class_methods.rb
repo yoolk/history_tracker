@@ -81,7 +81,15 @@ module HistoryTracker
         HistoryTracker.enabled? && HistoryTracker.enabled_for_controller? && Thread.current[track_history_flag] != false
       end
 
-      def disable_tracking(&_block)
+      def enable_tracking
+        Thread.current[track_history_flag] = true
+      end
+
+      def disable_tracking
+        Thread.current[track_history_flag] = false
+      end
+
+      def without_tracking(&_block)
         Thread.current[track_history_flag] = false
         yield
       ensure

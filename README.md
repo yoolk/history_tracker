@@ -64,13 +64,12 @@ HistoryTracker is simple to use. Just call `track_history` to a model to track c
 # app/models/listing.rb
 class Listing < ActiveRecord::Base
 
-  # should put below association
   track_history   class_name:     'ListingHistoryTracker'          # specify the tracker class name, default is the newly mongoid class with "HistoryTracker" suffix
                   only:           [:name],                         # track only the specified fields
                   except:         [],                              # track all fields except the specified fields
                   on:             [:create, :update, :destroy],    # by default, it tracks all events
                   changes_method: :changes,                        # alternate changes method
-                  parent:         nil,
+                  parent:         nil,                             # it's for nested relation
                   inverse_of:     nil
 end
 ```
@@ -81,30 +80,27 @@ This gives you a `history_tracks` method which returns historical changes to you
 # Assume that current_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
 >> listing = Listing.create(name: 'Listing 1')
 >> track = listing.history_tracks.last
->> track.action     #=> create
->> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
->> track.original   #=> {}
->> track.modified   #=> {"name": "Listing 1"}
->> track.changeset  #=> {"name": [nil, "Listing 1"]}
+>> track.action       #=> create
+>> track.modifier_id  #=> 1
+>> track.original     #=> {}
+>> track.modified     #=> {"name": "Listing 1"}
 
 >> listing.update_attributes(name: 'New Listing 1')
 >> track = listing.history_tracks.last
->> track.action     #=> update
->> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
->> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
->> track.modified   #=> {"name" => "New Listing 1"}
->> track.changeset  #=> {"name": ["Listing 1", "New Listing 1"]}
+>> track.action       #=> update
+>> track.modifier     #=> 1
+>> track.original     #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
+>> track.modified     #=> {"name" => "New Listing 1"}
 
 >> listing.destroy
 >> track = listing.history_tracks.last
 >> track.action     #=> destroy
->> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
+>> track.modifier   #=> 1
 >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
 >> track.modified   #=> {}
->> track.changeset  #=> {}
 ```
 
-#### Relation: `belongs_to`, `has_one` and `has_many`
+#### Examples
 
 ```ruby
 # app/models/location.rb
@@ -114,16 +110,16 @@ end
 # app/models/listing.rb
 class Listing < ActiveRecord::Base
   belongs_to :location
-  has_many   :comments, :dependent => :destroy
+  has_many   :comments, dependent: :destroy
 
-  track_history  include: [:location]
+  track_history
 end
 
 # app/models/comment.rb
 class Comment < ActiveRecord::Base
   belongs_to :listing
 
-  track_history  class_name: 'Listing::History'  # for direct relation, it's optional
+  track_history  class_name: 'Listing::History'
 end
 
 >> phnom_penh = Location.create(name: 'Phnom Penh')
@@ -138,12 +134,7 @@ end
 >> track = listing.history_tracks.last
 >> track.original  # {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC, "location"=>{"id"=>1, "name"=>"Phnom Penh"}}
 >> track.modified  # {"location"=>{"id"=>2, "name"=>"Siem Reap"}}
->> track.changeset # {"location"=>[{"id"=>1, "name"=>"Phnom Penh"}, {"id"=>2, "name"=>"Siem Reap"}]}
 ```
-
-#### Nested Relation
-
-For complex or nested relation, specify `:class_name` and `:association_chain` manually. For more examples, check out [spec/lib/nested_spec.rb] (https://github.com/yoolk/history_tracker/blob/master/spec/lib/nested_spec.rb).
 
 ## Enable/Disable Tracking
 
@@ -181,9 +172,6 @@ end
 If you are about change some widgets and you don't want to track your changes, you can disable/enable tracking like this:
 
 ```ruby
->> Listing.enabled = false
->> Listing.enabled = true
-
 >> Listing.disable_tracking
 >> Listing.enable_tracking
 ```
@@ -193,7 +181,7 @@ If you are about change some widgets and you don't want to track your changes, y
 You can call a method without tracking changes using `without_tracking`. It takes either a method name as a symbol:
 
 ```ruby
-@listing.without_tracking :destroy
+@listing.without_tracking(:destroy)
 ```
 
 Or a block:
@@ -235,7 +223,7 @@ class ListingController
   def upload_logo
     logo_url = @listing.logo_url
     if @listing.upload_logo(params)
-      @portal.create_history_track!(:update, logo_url: [logo_url, @listing.logo_url])
+      @portal.write_history_track!(:update, logo_url: [logo_url, @listing.logo_url])
     end
   end
 end

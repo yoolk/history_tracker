@@ -21,6 +21,7 @@ module HistoryTracker
         clear_trackable_memoization
         history_tracker_class.create!(tracked_attributes)
       end
+      alias_method :create_history_track!, :write_history_track!
 
       protected
 
