@@ -34,6 +34,14 @@ module HistoryTracker
         scope     :updates,           -> { where(action: 'update') }
         scope     :destroys,          -> { where(action: 'destroy') }
 
+        def original=(value)
+          super(value.stringify_keys) if value.is_a?(Hash)
+        end
+
+        def modified=(value)
+          super(value.stringify_keys) if value.is_a?(Hash)
+        end
+
         def self.recent_updated_since(time)
           recent.updated.since(time)
         end

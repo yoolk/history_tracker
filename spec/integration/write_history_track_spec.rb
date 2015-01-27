@@ -38,6 +38,12 @@ describe '#write_history_track!' do
       expect(history_track.original).to eq({"name"=>"Listing 1", "description"=>"Description 1"})
       expect(history_track.modified).to eq({"name"=>"Listing 2", "description"=>"Description 2"})
     end
+
+    it "should not create history_track when changes is the same" do
+      expect {
+        listing.write_history_track!(:update, { 'name' => ['Listing 1', 'Listing 1'], 'description' => ['Description 1', 'Description 1'] })
+      }.to raise_error(Mongoid::Errors::Validations, /the same/)
+    end
   end
 
   context '#write_history_track! on :destroy' do

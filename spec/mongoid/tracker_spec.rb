@@ -21,3 +21,15 @@ describe MyTracker, type: :mongoid do
   it { should validate_presence_of(:trackable_class_name) }
   it { should validate_inclusion_of(:action).to_allow('create', 'update', 'destroy') }
 end
+
+describe MyTracker, 'methods' do
+  let(:tracker) { MyTracker.new(original: {name: 'Listing 1'}, modified: {name: 'Listing 2'}) }
+
+  it '#original should be stringify_keys' do
+    expect(tracker.original).to eq({'name' => 'Listing 1'})
+  end
+
+  it '#modified should be stringify_keys' do
+    expect(tracker.modified).to eq({'name' => 'Listing 2'})
+  end
+end
