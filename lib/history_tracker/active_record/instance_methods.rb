@@ -7,7 +7,7 @@ module HistoryTracker
       end
 
       def history_tracks
-        @history_tracks ||= history_tracker_class.where(association_hash_query.merge(trackable_class_name: self.class.name))
+        @history_tracks ||= history_tracker_class.where(association_hash_query)
       end
 
       def write_history_track!(action, changes={}, modifier_id=HistoryTracker.current_modifier_id)

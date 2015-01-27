@@ -110,7 +110,7 @@ describe Photo, 'track on create' do
   it 'should have association_chain' do
     expected =  [ { "name"=>"Listing", "id"=>listing.id },
                   { "name"=>"albums", "id"=>album.id },
-                  {"name"=>"photos", "id"=>photo.id}
+                  { "name"=>"photos", "id"=>photo.id }
                 ]
 
     expect(history_track.association_chain).to eq(expected)
