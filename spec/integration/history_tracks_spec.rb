@@ -14,15 +14,15 @@ describe Photo, '#history_tracks' do
     end
 
     it 'includes Listing\'s track' do
-      expect(listing1.history_tracks[0].trackable_class_name).to eq('Listing')
+      expect(listing1.history_tracks[0].trackable_klass_name).to eq('Listing')
     end
 
     it 'includes Album\'s track' do
-      expect(listing1.history_tracks[1].trackable_class_name).to eq('Album')
+      expect(listing1.history_tracks[1].trackable_klass_name).to eq('Album')
     end
 
     it 'includes Photo\'s track' do
-      expect(listing1.history_tracks[2].trackable_class_name).to eq('Photo')
+      expect(listing1.history_tracks[2].trackable_klass_name).to eq('Photo')
     end
   end
 
@@ -32,11 +32,11 @@ describe Photo, '#history_tracks' do
     end
 
     it 'includes Album\'s track' do
-      expect(album1.history_tracks[0].trackable_class_name).to eq('Album')
+      expect(album1.history_tracks[0].trackable_klass_name).to eq('Album')
     end
 
     it 'includes Photo\'s track' do
-      expect(album1.history_tracks[1].trackable_class_name).to eq('Photo')
+      expect(album1.history_tracks[1].trackable_klass_name).to eq('Photo')
     end
   end
 
@@ -46,7 +46,7 @@ describe Photo, '#history_tracks' do
     end
 
     it 'includes Photo\'s track' do
-      expect(photo1.history_tracks[0].trackable_class_name).to eq('Photo')
+      expect(photo1.history_tracks[0].trackable_klass_name).to eq('Photo')
     end
   end
 end

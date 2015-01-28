@@ -10,8 +10,8 @@ describe Listing, 'track on destroy' do
     }.to change(ListingHistoryTracker, :count).by(1)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Listing')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Listing')
   end
 
   it 'should have association_chain' do
@@ -54,8 +54,8 @@ describe Album, 'track on destroy' do
     }.to change(ListingHistoryTracker, :count).by(1)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Album')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Album')
   end
 
   it 'should have association_chain' do
@@ -102,8 +102,8 @@ describe Photo, 'track on destroy' do
     }.to change(ListingHistoryTracker, :count).by(1)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Photo')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Photo')
   end
 
   it 'should have association_chain' do

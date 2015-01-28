@@ -12,8 +12,8 @@ describe Listing, 'track on create' do
     expect(history_track).to be_instance_of(ListingHistoryTracker)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Listing')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Listing')
   end
 
   it 'should have association_chain' do
@@ -30,12 +30,16 @@ describe Listing, 'track on create' do
     expect(history_track.modified).to eq({"name"=>"Listing 1", "description"=>"Description 1"})
   end
 
+  it 'should have changes field' do
+    expect(history_track.changes).to eq({"name"=>[nil, "Listing 1"], "description"=>[nil, "Description 1"]})
+  end
+
   it 'should have action' do
     expect(history_track.action).to eq('create')
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Listing')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Listing')
   end
 
   it 'should have modifier field' do
@@ -56,8 +60,8 @@ describe Album, 'track on create' do
     expect(history_track).to be_instance_of(ListingHistoryTracker)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Album')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Album')
   end
 
   it 'should have association_chain' do
@@ -76,12 +80,16 @@ describe Album, 'track on create' do
     expect(history_track.modified).to eq({"name"=>"Album 1"})
   end
 
+  it 'should have changes field' do
+    expect(history_track.changes).to eq({"name"=>[nil, "Album 1"]})
+  end
+
   it 'should have action' do
     expect(history_track.action).to eq('create')
   end
 
   it 'should have action' do
-    expect(history_track.trackable_class_name).to eq('Album')
+    expect(history_track.trackable_klass_name).to eq('Album')
   end
 
   it 'should have modifier field' do
@@ -103,8 +111,8 @@ describe Photo, 'track on create' do
     expect(history_track).to be_instance_of(ListingHistoryTracker)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Photo')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Photo')
   end
 
   it 'should have association_chain' do
@@ -124,12 +132,16 @@ describe Photo, 'track on create' do
     expect(history_track.modified).to eq({"caption"=>"Caption 1", "album_id"=>album.id})
   end
 
+  it 'should have changes field' do
+    expect(history_track.changes).to eq({"caption"=>[nil, "Caption 1"], "album_id"=>[nil, album.id]})
+  end
+
   it 'should have action' do
     expect(history_track.action).to eq('create')
   end
 
   it 'should have action' do
-    expect(history_track.trackable_class_name).to eq('Photo')
+    expect(history_track.trackable_klass_name).to eq('Photo')
   end
 
   it 'should have modifier field' do

@@ -12,7 +12,7 @@ describe 'modified_attributes' do
     end
 
     it 'invokes changes_method' do
-      expect(listing_modified_attributes).to eq({"name"=>[nil, "Listing 1"], "description"=>[nil, "Description 1"], "is_active"=>[nil, nil], "location_id"=>[nil, listing.location_id], "location"=>[nil, listing.location.name]})
+      expect(listing_modified_attributes).to eq({"name"=>[nil, "Listing 1"], "description"=>[nil, "Description 1"], "location_id"=>[nil, listing.location_id], "location"=>[nil, listing.location.name]})
     end
   end
 
@@ -47,7 +47,7 @@ describe 'modified_attributes' do
     end
 
     it 'invokes changes_method' do
-      expect(listing_modified_attributes).to eq({"id"=>[listing.id, nil], "name"=>["Listing 1", nil], "description"=>["Description 1", nil], "is_active"=>[nil, nil], "created_at"=>[listing.created_at, nil], "updated_at"=>[listing.updated_at, nil], "location_id"=>[listing.location_id, nil], "location"=>[listing.location.name, nil]})
+      expect(listing_modified_attributes).to eq({"id"=>[listing.id, nil], "name"=>["Listing 1", nil], "description"=>["Description 1", nil], "created_at"=>[listing.created_at, nil], "updated_at"=>[listing.updated_at, nil], "location_id"=>[listing.location_id, nil], "location"=>[listing.location.name, nil]})
     end
   end
 

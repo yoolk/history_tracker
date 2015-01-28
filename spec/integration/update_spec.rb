@@ -16,8 +16,8 @@ describe Listing, 'track on update' do
     }.to change(ListingHistoryTracker, :count).by(0)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Listing')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Listing')
   end
 
   it 'should have association_chain' do
@@ -36,6 +36,12 @@ describe Listing, 'track on update' do
     listing.update_attributes!(name: 'Listing 2', description: 'Description 2')
 
     expect(history_track.original).to eq('name'=>'Listing 1', 'description'=>'Description 1')
+  end
+
+  it 'should have changes field' do
+    listing.update_attributes!(name: 'Listing 2', description: 'Description 2')
+
+    expect(history_track.changes).to eq({"name"=>["Listing 1", "Listing 2"], "description"=>["Description 1", "Description 2"]})
   end
 
   it 'should have action field' do
@@ -60,8 +66,8 @@ describe Album, 'track on update' do
     }.to change(ListingHistoryTracker, :count).by(1)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Album')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Album')
   end
 
   it 'should have association_chain' do
@@ -83,6 +89,12 @@ describe Album, 'track on update' do
     album.update_attributes!(name: 'Album 2')
 
     expect(history_track.original).to eq({"name"=>"Album 1"})
+  end
+
+  it 'should have changes field' do
+    album.update_attributes!(name: 'Album 2')
+
+    expect(history_track.changes).to eq({"name"=>["Album 1", "Album 2"]})
   end
 
   it 'should have action field' do
@@ -108,8 +120,8 @@ describe Photo, 'track on update' do
     }.to change(ListingHistoryTracker, :count).by(1)
   end
 
-  it 'should have trackable_class_name' do
-    expect(history_track.trackable_class_name).to eq('Photo')
+  it 'should have trackable_klass_name' do
+    expect(history_track.trackable_klass_name).to eq('Photo')
   end
 
   it 'should have association_chain' do
@@ -132,6 +144,12 @@ describe Photo, 'track on update' do
     photo.update_attributes!(caption: 'Caption 2')
 
     expect(history_track.original).to eq({"caption"=>"Caption 1"})
+  end
+
+  it 'should have changes field' do
+    photo.update_attributes!(caption: 'Caption 2')
+
+    expect(history_track.changes).to eq({"caption"=>["Caption 1", "Caption 2"]})
   end
 
   it 'should have action field' do
