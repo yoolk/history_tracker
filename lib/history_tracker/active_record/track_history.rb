@@ -35,15 +35,13 @@ module HistoryTracker
           options[:except] = [options[:except]] unless options[:except].is_a? Array
           options[:except] = options[:except].map { |field| database_field_name(field) }.compact.uniq
 
-          extend HistoryTracker::ActiveRecord::ClassMethods
-          include HistoryTracker::ActiveRecord::InstanceMethods
-
           # define history_trackable_parent method
           # this method is needed when traversing association_chain
           define_method   :history_trackable_parent do
             send(options[:parent]) if options[:parent] && respond_to?(options[:parent])
           end
 
+          # makes these methods available on class/instance
           delegate        :history_trackable_options, :tracked_fields, :non_tracked_fields,
                           :history_tracker_class, :track_history?,
                           to: 'self.class'
@@ -56,6 +54,9 @@ module HistoryTracker
           after_create    :track_create   if options[:on].include?(:create)
           before_update   :track_update   if options[:on].include?(:update)
           before_destroy  :track_destroy  if options[:on].include?(:destroy)
+
+          extend HistoryTracker::ActiveRecord::ClassMethods
+          include HistoryTracker::ActiveRecord::InstanceMethods
 
           HistoryTracker.trackable_class_options ||= {}
           HistoryTracker.trackable_class_options[self.name] = options

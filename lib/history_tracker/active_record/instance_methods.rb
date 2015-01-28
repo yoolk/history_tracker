@@ -10,6 +10,13 @@ module HistoryTracker
         @history_tracks ||= history_tracker_class.where(association_hash_query)
       end
 
+      # Write history track manually
+      #
+      # @params action
+      # @params changes
+      # @params modifier_id
+      #
+      # Returns the track that has written
       def write_history_track!(action, changes={}, modifier_id=HistoryTracker.current_modifier_id)
         changes = modified_attributes_for_destroy if action.to_sym == :destroy
         original, modified = transform_changes(changes)
@@ -77,13 +84,13 @@ module HistoryTracker
           @modified_attributes_for_update ||= send(history_trackable_options[:changes_method]).select { |k, _| self.class.tracked_field?(k, :update) }
         end
 
+        # Retrieves the modified attributes for destroy action
+        #
+        # Returns hash which contains field as key and [value, nil] as value
         # Eg: {"name"=>["Listing 1", nil], "description"=> ["Description 1", nil]}
         def modified_attributes_for_destroy
           @modified_attributes_for_destroy
           changes||= attributes.inject({}) do |h, (k, v)|
-        # Retrieves the modified attributes for destroy action
-        #
-        # Returns hash which contains field as key and [value, nil] as value
             h[k] = [v, nil]
             h
           end.select { |k, _| self.class.tracked_field?(k, :destroy) }

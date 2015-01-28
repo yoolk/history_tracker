@@ -108,7 +108,7 @@ module HistoryTracker
 
         def tracking_history_enabled?
           expects "#{model_class} to be tracked history"
-          model_class.respond_to?(:track_history?) && model_class.track_history?
+          model_class.respond_to?(:tracking_enabled?) && model_class.tracking_enabled?
         end
 
         def parent_options?

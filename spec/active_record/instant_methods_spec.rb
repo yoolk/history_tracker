@@ -31,4 +31,28 @@ describe 'modified_attributes' do
       expect(subject).to eq({"id"=>[listing.id, nil], "name"=>["Listing 2", nil], "description"=>["Description 2", nil], "is_active"=>[nil, nil], "created_at"=>[listing.created_at, nil], "updated_at"=>[listing.updated_at, nil], "location_id"=>[nil, nil]})
     end
   end
+
+  context 'delegate methods' do
+    let(:listing)  { Listing.new(name: 'Listing 1', description: 'Description 1') }
+
+    it 'respond_to :history_trackable_options' do
+      expect(listing).to respond_to(:history_trackable_options)
+    end
+
+    it 'respond_to :tracked_fields' do
+      expect(listing).to respond_to(:tracked_fields)
+    end
+
+    it 'respond_to :non_tracked_fields' do
+      expect(listing).to respond_to(:non_tracked_fields)
+    end
+
+    it 'respond_to :history_tracker_class' do
+      expect(listing).to respond_to(:history_tracker_class)
+    end
+
+    it 'respond_to :track_history?' do
+      expect(listing).to respond_to(:track_history?)
+    end
+  end
 end

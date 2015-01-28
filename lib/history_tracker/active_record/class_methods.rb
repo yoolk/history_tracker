@@ -77,8 +77,15 @@ module HistoryTracker
         end
       end
 
+      # Returns true if the below conditions are met, ie: globally, per controller, per model.
+      # This method is used to determine whether to track history or not.
       def track_history?
-        HistoryTracker.enabled? && HistoryTracker.enabled_for_controller? && Thread.current[track_history_flag] != false
+        HistoryTracker.enabled? && HistoryTracker.enabled_for_controller? && tracking_enabled?
+      end
+
+      # Returns true if this model is currently enabled for tracking history
+      def tracking_enabled?
+        Thread.current[track_history_flag] != false
       end
 
       def enable_tracking
