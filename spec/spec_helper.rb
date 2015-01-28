@@ -12,6 +12,7 @@ end
 
 require 'pry'
 require 'mongoid-rspec'
+require 'database_cleaner'
 require 'history_tracker'
 require 'history_tracker/matchers'
 
@@ -31,9 +32,18 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.include Mongoid::Matchers, type: :mongoid
 
-  # Clean/Reset Mongoid DB prior to running the tests
-  config.before :each do
+  config.before(:suite) do
+    DatabaseCleaner[:active_record].strategy = :transaction
+    DatabaseCleaner[:active_record].clean_with(:truncation)
+  end
+
+  config.around(:each) do |example|
+    # Clean/Reset Mongoid DB prior to running the tests
     Mongoid.default_session.drop
+
+    DatabaseCleaner[:active_record].cleaning do
+      example.run
+    end
   end
 end
 

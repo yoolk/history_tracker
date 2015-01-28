@@ -4,7 +4,7 @@ describe Listing do
   it { should be_tracked_history }
   it { should be_tracked_history.except(:view_count) }
   it { should be_tracked_history.only(:name, :description, :is_active, :location_id) }
-  it { should be_tracked_history.changes_method(:changes) }
+  it { should be_tracked_history.changes_method(:history_changes) }
 end
 
 describe Album do

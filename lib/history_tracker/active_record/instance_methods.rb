@@ -30,6 +30,12 @@ module HistoryTracker
       end
       alias_method :create_history_track!, :write_history_track!
 
+      # Retrieve the changes attributes
+      # By default, it invokes `#changes`, otherwise it invokes `changes_method` option.
+      def history_trackable_changes
+        send(history_trackable_options[:changes_method]).stringify_keys
+      end
+
       protected
 
         def track_history_for_action?(action)
@@ -73,7 +79,7 @@ module HistoryTracker
           @modified_attributes_for_create ||= attributes.inject({}) do |h, (k, v)|
             h[k] = [nil, v]
             h
-          end.select { |k, _| self.class.tracked_field?(k, :create) }
+          end.merge(history_trackable_changes).select { |k, _| self.class.tracked_field?(k, :create) }
         end
 
         # Retrieves the modified attributes for update action
@@ -81,7 +87,7 @@ module HistoryTracker
         # Returns hash which contains field as key and [old_value, new_value] as value
         # Eg: {"name"=>["Old Listing", "Listing 1"], "description"=> ["Old Description", "Description 1"]}
         def modified_attributes_for_update
-          @modified_attributes_for_update ||= send(history_trackable_options[:changes_method]).select { |k, _| self.class.tracked_field?(k, :update) }
+          @modified_attributes_for_update ||= history_trackable_changes.select { |k, _| self.class.tracked_field?(k, :update) }
         end
 
         # Retrieves the modified attributes for destroy action
@@ -89,11 +95,10 @@ module HistoryTracker
         # Returns hash which contains field as key and [value, nil] as value
         # Eg: {"name"=>["Listing 1", nil], "description"=> ["Description 1", nil]}
         def modified_attributes_for_destroy
-          @modified_attributes_for_destroy
-          changes||= attributes.inject({}) do |h, (k, v)|
+          @modified_attributes_for_destroy ||= attributes.inject({}) do |h, (k, v)|
             h[k] = [v, nil]
             h
-          end.select { |k, _| self.class.tracked_field?(k, :destroy) }
+          end.merge(history_trackable_changes).select { |k, _| self.class.tracked_field?(k, :destroy) }
         end
 
         # Returns a Hash of field name to pairs of original and modified values
@@ -168,10 +173,11 @@ module HistoryTracker
         end
 
         def clear_trackable_memoization
-          @history_tracker_attributes     = nil
-          @modified_attributes_for_create = nil
-          @modified_attributes_for_update = nil
-          @history_tracks                 = nil
+          @history_tracker_attributes      = nil
+          @modified_attributes_for_create  = nil
+          @modified_attributes_for_update  = nil
+          @modified_attributes_for_destroy = nil
+          @history_tracks                  = nil
         end
     end
   end

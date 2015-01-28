@@ -7,7 +7,7 @@ describe '#track_history' do
 
   context '#history_trackable_options' do
     it 'Listing model' do
-      expect(Listing.history_trackable_options).to eq({:on=>[:create, :update, :destroy], :changes_method=>:changes, :except=>["view_count"], :only=>[]})
+      expect(Listing.history_trackable_options).to eq({:on=>[:create, :update, :destroy], :changes_method=>:history_changes, :except=>["view_count"], :only=>[]})
     end
 
     it 'Album model' do

@@ -11,6 +11,7 @@ ActiveRecord::Schema.define do
 
   create_table :locations, force: true do |t|
     t.column :name, :string
+    t.column :description, :string
   end
 
   create_table :listings, force: true do |t|

@@ -61,6 +61,7 @@ module HistoryTracker
               errors.add(:modified, 'must be blank')      if modified.present?
             end
 
+            # TODO: validates on each field to see original and modified are really changed.
             errors.add(:base, 'original and modified must not be the same') if original == modified
           end
       end
