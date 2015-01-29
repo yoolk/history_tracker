@@ -97,10 +97,11 @@ module HistoryTracker
       end
 
       def without_tracking(&_block)
-        Thread.current[track_history_flag] = false
+        tracking_was_enabled = tracking_enabled?
+        disable_tracking
         yield
       ensure
-        Thread.current[track_history_flag] = true
+        enable_tracking if tracking_was_enabled
       end
 
       def track_history_flag

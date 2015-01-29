@@ -2,9 +2,10 @@ require 'spec_helper'
 
 describe 'modified_attributes' do
   context '#modified_attributes_for_create' do
-    let!(:location)                     { Location.create!(name: 'Location 1', description: 'Description 1') }
-    let(:listing)                       { Listing.new(name: 'Listing 1', description: 'Description 1', location: location) }
-    let(:location_modified_attributes)  { location.send(:modified_attributes_for_create) }
+    let!(:location1)                    { Location.new(name: 'Location 1', description: 'Description 1') }
+    let!(:location2)                    { Location.create!(name: 'Location 2', description: 'Description 2') }
+    let(:listing)                       { Listing.new(name: 'Listing 1', description: 'Description 1', location: location2) }
+    let(:location_modified_attributes)  { location1.send(:modified_attributes_for_create) }
     let(:listing_modified_attributes)   { listing.send(:modified_attributes_for_create) }
 
     it 'returns changeset which excludes only non_tracked_fields' do

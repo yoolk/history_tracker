@@ -37,6 +37,14 @@ module HistoryTracker
         send(history_trackable_options[:changes_method]).stringify_keys
       end
 
+      def without_tracking(method = nil)
+        tracking_was_enabled = self.class.tracking_enabled?
+        self.class.disable_tracking
+        method ? method.to_proc.call(self) : yield
+      ensure
+        self.class.enable_tracking if tracking_was_enabled
+      end
+
       protected
 
         def track_history_for_action?(action)

@@ -34,6 +34,15 @@ describe MyTracker, 'methods' do
     expect(tracker.modified).to eq({'name' => 'Listing 2'})
   end
 
+  context '#validations' do
+    it 'fails when old and new value are the same' do
+      tracker = MyTracker.new(action: 'update', changeset: {name: ['Listing 1', 'Listing 1']}, original: {name: 'Listing 1'}, modified: {name: 'Listing 1'})
+
+      tracker.valid?
+      expect(tracker.errors.full_messages.to_s).to match(/the same/)
+    end
+  end
+
   context '#trackable' do
     let!(:listing)      { Listing.create!(name: 'Listing 1') }
     let(:history_track) { listing.history_tracks.first }

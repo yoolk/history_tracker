@@ -73,7 +73,6 @@ module HistoryTracker
               errors.add(:changeset, 'must be blank')     if changeset.present?
             end
 
-            # TODO: validates on each field to see original and modified are really changed on update.
             errors.add(:base, 'original and modified must not be the same') if original == modified
           end
       end
