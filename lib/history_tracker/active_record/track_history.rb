@@ -37,6 +37,8 @@ module HistoryTracker
             parent_klass          = parent_reflection.klass
             inverse_of_reflection = parent_klass.try(:reflect_on_association, options[:inverse_of])
 
+            raise "`parent` and `inverse_of` options must be existed together."                     if options[:inverse_of].blank?
+            raise "parent relation :#{options[:parent]} should be tracked history."                 if !parent_klass.tracking_enabled?
             raise "Couldn't find parent relation :#{options[:parent]} on #{self.name}."             if parent_klass.nil?
             raise "Couldn't find inverse_of relation :#{options[:inverse_of]} on #{parent_klass}."  if inverse_of_reflection.nil?
           end

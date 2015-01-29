@@ -133,7 +133,7 @@ module HistoryTracker
           if @options[:only]
             only = @options[:only].map { |field| model_class.database_field_name(field) }
             expects "tracked history fields (#{model_class.tracked_fields.inspect}) to match (#{only})"
-            model_class.tracked_fields == only
+            model_class.tracked_fields.sort == only.sort
           else
             true
           end
