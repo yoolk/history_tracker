@@ -28,8 +28,18 @@ module HistoryTracker
           options = default_options.merge(options)
 
           # make :only and :except are array
-          options[:only] = [options[:only]] unless options[:only].is_a? Array
-          options[:except] = [options[:except]] unless options[:except].is_a? Array
+          options[:only]    = [options[:only]]     unless options[:only].is_a? Array
+          options[:except]  = [options[:except]]   unless options[:except].is_a? Array
+
+          # validate :parent and :inverse_of
+          if options[:parent].present?
+            parent_reflection     = reflect_on_association(options[:parent])
+            parent_klass          = parent_reflection.klass
+            inverse_of_reflection = parent_klass.try(:reflect_on_association, options[:inverse_of])
+
+            raise "Couldn't find parent relation :#{options[:parent]} on #{self.name}."             if parent_klass.nil?
+            raise "Couldn't find inverse_of relation :#{options[:inverse_of]} on #{parent_klass}."  if inverse_of_reflection.nil?
+          end
 
           # define history_trackable_parent method
           # this method is needed when traversing association_chain
