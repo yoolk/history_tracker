@@ -152,7 +152,7 @@ module HistoryTracker
         def on_options?
           if @options[:on]
             expects "tracked history callbacks (#{history_trackable_options[:on].inspect}) to match (#{@options[:on]})"
-            history_trackable_options[:on] == @options[:on]
+            history_trackable_options[:on].sort == @options[:on].sort
           else
             true
           end

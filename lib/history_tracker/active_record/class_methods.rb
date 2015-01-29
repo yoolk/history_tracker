@@ -36,7 +36,11 @@ module HistoryTracker
       def non_tracked_fields
         return @non_tracked_fields if @non_tracked_fields
 
+        # normalize :except fields to an array of database field strings
         h = history_trackable_options
+        h[:only]    = h[:only].map { |field| database_field_name(field) }.compact.uniq
+        h[:except]  = h[:except].map { |field| database_field_name(field) }.compact.uniq
+
         if h[:only].present?
           except = column_names - h[:only]
         else

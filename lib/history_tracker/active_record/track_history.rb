@@ -27,13 +27,9 @@ module HistoryTracker
           }
           options = default_options.merge(options)
 
-          # normalize :only fields to an array of database field strings
+          # make :only and :except are array
           options[:only] = [options[:only]] unless options[:only].is_a? Array
-          options[:only] = options[:only].map { |field| database_field_name(field) }.compact.uniq
-
-          # normalize :except fields to an array of database field strings
           options[:except] = [options[:except]] unless options[:except].is_a? Array
-          options[:except] = options[:except].map { |field| database_field_name(field) }.compact.uniq
 
           # define history_trackable_parent method
           # this method is needed when traversing association_chain
