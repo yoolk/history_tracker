@@ -2,6 +2,7 @@ services: mongodb
 language: ruby
 script: "bundle exec rake spec"
 rvm:
+  - 2.0.0
   - 2.1.5
   - 2.2.0
 env:
@@ -14,5 +15,5 @@ gemfile:
 notifications:
   email: false
 addons:
-    code_climate:
-        repo_token: 08c4925d2cd6a7ca5603cc761ec6c7df4104b98321704a4f512700b2cb4a2f57
+  code_climate:
+    repo_token: 08c4925d2cd6a7ca5603cc761ec6c7df4104b98321704a4f512700b2cb4a2f57
