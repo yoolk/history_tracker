@@ -5,16 +5,16 @@ ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:'
 ActiveRecord::Migration.verbose = false
 
 ActiveRecord::Schema.define do
-  create_table :users, :force => true do |t|
+  create_table :users, force: true do |t|
     t.column :email, :string
   end
 
-  create_table :locations, :force => true do |t|
+  create_table :locations, force: true do |t|
     t.column :name, :string
-    t.column :priority, :integer
+    t.column :description, :string
   end
 
-  create_table :listings, :force => true do |t|
+  create_table :listings, force: true do |t|
     t.column :name, :string
     t.column :description, :string
     t.column :is_active, :boolean
@@ -24,21 +24,17 @@ ActiveRecord::Schema.define do
     t.column :location_id, :integer
   end
 
-  create_table :comments, :force => true do |t|
-    t.column :title, :string
-    t.column :body, :string
-    t.column :listing_id, :integer
+  create_table :albums, force: true do |t|
+    t.column :name, :string
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
-  end
-
-  create_table :albums, :force => true do |t|
-    t.column :name, :string
     t.column :listing_id, :integer
   end
 
-  create_table :images, :force => true do |t|
+  create_table :photos, force: true do |t|
     t.column :caption, :string
+    t.column :created_at, :datetime
+    t.column :updated_at, :datetime
     t.column :album_id, :integer
   end
 end

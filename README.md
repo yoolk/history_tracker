@@ -1,20 +1,20 @@
 # HistoryTracker [![Build Status](https://travis-ci.org/yoolk/history_tracker.png?branch=master)](https://travis-ci.org/yoolk/history_tracker) [![Code Climate](https://codeclimate.com/repos/527f070ec7f3a35566083437/badges/1e1ed5492aa1f25b3e36/gpa.png)](https://codeclimate.com/repos/527f070ec7f3a35566083437/feed) [![Dependency Status](https://gemnasium.com/yoolk/history_tracker.png)](https://gemnasium.com/yoolk/history_tracker) [![Coverage Status](https://coveralls.io/repos/yoolk/history_tracker/badge.png?branch=master)](https://coveralls.io/r/yoolk/history_tracker?branch=master)
 
-HistoryTracker tracks historical changes for any active record models, including its associations, and stores in MongoDB. It achieves this by storing all history tracks in a single collection that you define. Association models are referenced by storing an association path, which is an array of `model_name` and `model_id` fields starting from the top most parent and down to the assoication that should track history.
+**HistoryTracker** is inspired by [mongoid-history](https://github.com/aq1018/mongoid-history) and [audited](https://github.com/collectiveidea/audited). **HistoryTracker** tracks historical changes for any active record models, including its associations, and stores in MongoDB. It achieves this by storing all history tracks in a single collection that you define. Association models are referenced by storing an association path, which is an array of `model_name` and `model_id` fields starting from the top most parent and down to the assoication that should track history.
 
 ## Installation
 
-This gem depends on ActiveRecord 3.x and Mongoid 3.x. It's well tested on Ruby 1.9.3 and 2.0.0 only.
+This gem depends on ActiveRecord 3.x/4.x and Mongoid 3.x/4x.
 
 ```ruby
-gem 'history_tracker', :git => 'git://github.com/yoolk/history_tracker.git'
+gem 'history_tracker', github: 'yoolk/history_tracker'
 ```
 
 ## Usage
 
 #### Tracker class name
 
-By default, an active record model will have `history_class` pointed to eg. `Listing::History`.
+By default, an active record model will have `history_tracker_class` pointed to eg. `ListingHistoryTracker`.
 
 ```ruby
 # app/models/listing.rb
@@ -22,7 +22,7 @@ class Listing < ActiveRecord::Base
   track_history
 end
 
->> Listing.history_class # => Listing::History
+>> Listing.history_tracker_class # => ListingHistoryTracker
 ```
 
 However, you can specify the history class name with `:class_name` options. All histories related to this model are stored in this tracker class.
@@ -38,7 +38,7 @@ class Listing::HistoryTracker
   include HistoryTracker::Mongoid::Tracker
 end
 
->> Listing.history_class # => Listing::HistoryTracker
+>> Listing.history_tracker_class # => Listing::HistoryTracker
 ```
 
 #### #current_user method name
@@ -48,13 +48,11 @@ By default, this gem will invoke `current_user` method and save its attributes o
 ```ruby
 # config/initializers/history_tracker.rb
 HistoryTracker.current_user_method = :authenticated_user
-HistroyTracker.current_user_fields = [:id, :email]
 
 # Assume that authenticated_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
 >> listing = Listing.first
->> listing.update_attributes(name: 'New Name')
+>> listing.update_attributes!(name: 'New Name')
 
->> listing.history_tracks.last.modifier    #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
 >> listing.history_tracks.last.modifier_id #=> 1
 ```
 
@@ -66,14 +64,13 @@ HistoryTracker is simple to use. Just call `track_history` to a model to track c
 # app/models/listing.rb
 class Listing < ActiveRecord::Base
 
-  # should put below association
-  track_history   :scope      => "listing",                       # scope, default is the underscore version of this model
-                  :class_name => "Listing::History"               # specify the tracker class name, default is the newly mongoid class with "::History" suffix
-                  :only       => [:name],                         # track only the specified fields
-                  :except     => [],                              # track all fields except the specified fields
-                  :on         => [:create, :update, :destroy],    # by default, it tracks all events
-                  :include    => [],                              # track :belongs_to association
-                  :association_chain => lambda { |record| [] }    # specify association_chain for complex relations
+  track_history   class_name:     'ListingHistoryTracker'          # specify the tracker class name, default is the newly mongoid class with "HistoryTracker" suffix
+                  only:           [:name],                         # track only the specified fields
+                  except:         [],                              # track all fields except the specified fields
+                  on:             [:create, :update, :destroy],    # by default, it tracks all events
+                  changes_method: :changes,                        # alternate changes method
+                  parent:         nil,                             # it's for nested relation
+                  inverse_of:     nil
 end
 ```
 
@@ -83,33 +80,27 @@ This gives you a `history_tracks` method which returns historical changes to you
 # Assume that current_user returns #<User id: 1, email: 'chamnap@yoolk.com'>
 >> listing = Listing.create(name: 'Listing 1')
 >> track = listing.history_tracks.last
->> track.scope      #=> listing
->> track.action     #=> create
->> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
->> track.original   #=> {}
->> track.modified   #=> {"name": "Listing 1"}
->> track.changeset  #=> {"name": [nil, "Listing 1"]}
+>> track.action       #=> create
+>> track.modifier_id  #=> 1
+>> track.original     #=> {}
+>> track.modified     #=> {"name": "Listing 1"}
 
 >> listing.update_attributes(name: 'New Listing 1')
 >> track = listing.history_tracks.last
->> track.scope      #=> listing
->> track.action     #=> update
->> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
->> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
->> track.modified   #=> {"name" => "New Listing 1"}
->> track.changeset  #=> {"name": ["Listing 1", "New Listing 1"]}
+>> track.action       #=> update
+>> track.modifier     #=> 1
+>> track.original     #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
+>> track.modified     #=> {"name" => "New Listing 1"}
 
 >> listing.destroy
 >> track = listing.history_tracks.last
->> track.scope      #=> listing
 >> track.action     #=> destroy
->> track.modifier   #=> {"id" => 1, "email" => "chamnap@yoolk.com"}
+>> track.modifier   #=> 1
 >> track.original   #=> {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC}
 >> track.modified   #=> {}
->> track.changeset  #=> {}
 ```
 
-#### Relation: `belongs_to`, `has_one` and `has_many`
+#### Examples
 
 ```ruby
 # app/models/location.rb
@@ -119,17 +110,16 @@ end
 # app/models/listing.rb
 class Listing < ActiveRecord::Base
   belongs_to :location
-  has_many   :comments, :dependent => :destroy
+  has_many   :comments, dependent: :destroy
 
-  track_history  include: [:location]
+  track_history
 end
 
 # app/models/comment.rb
 class Comment < ActiveRecord::Base
   belongs_to :listing
 
-  track_history  scope:      :listing,           # must have a :belongs_to association
-                 class_name: 'Listing::History'  # for direct relation, it's optional
+  track_history  class_name: 'Listing::History'
 end
 
 >> phnom_penh = Location.create(name: 'Phnom Penh')
@@ -144,12 +134,7 @@ end
 >> track = listing.history_tracks.last
 >> track.original  # {"id" => 1, "name" => "Listing 1", "created_at"=>2013-03-12 06:25:51 UTC, "updated_at"=>2013-03-12 06:44:37 UTC, "location"=>{"id"=>1, "name"=>"Phnom Penh"}}
 >> track.modified  # {"location"=>{"id"=>2, "name"=>"Siem Reap"}}
->> track.changeset # {"location"=>[{"id"=>1, "name"=>"Phnom Penh"}, {"id"=>2, "name"=>"Siem Reap"}]}
 ```
-
-#### Nested Relation
-
-For complex or nested relation, specify `:class_name` and `:association_chain` manually. For more examples, check out [spec/lib/nested_spec.rb] (https://github.com/yoolk/history_tracker/blob/master/spec/lib/nested_spec.rb).
 
 ## Enable/Disable Tracking
 
@@ -187,9 +172,6 @@ end
 If you are about change some widgets and you don't want to track your changes, you can disable/enable tracking like this:
 
 ```ruby
->> Listing.enabled = false
->> Listing.enabled = true
-
 >> Listing.disable_tracking
 >> Listing.enable_tracking
 ```
@@ -199,7 +181,7 @@ If you are about change some widgets and you don't want to track your changes, y
 You can call a method without tracking changes using `without_tracking`. It takes either a method name as a symbol:
 
 ```ruby
-@listing.without_tracking :destroy
+@listing.without_tracking(:destroy)
 ```
 
 Or a block:
@@ -234,14 +216,14 @@ class ListingController
 end
 ```
 
-It's possible to track custom operation with `create_history_track!`. It's good for complex relation or custom attributes.
+It's possible to track custom operation with `write_history_track!`. It's good for complex relation or custom attributes.
 
 ```ruby
 class ListingController
   def upload_logo
     logo_url = @listing.logo_url
     if @listing.upload_logo(params)
-      @portal.create_history_track!(:update, logo_url: [logo_url, @listing.logo_url])
+      @portal.write_history_track!(:update, logo_url: [logo_url, @listing.logo_url])
     end
   end
 end
@@ -250,4 +232,3 @@ end
 ## Authors
 
 * [Chamnap Chhorn](https://github.com/chamnap)
-* [Vorleak Chy](https://github.com/vorleakchy)

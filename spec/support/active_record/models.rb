@@ -2,122 +2,54 @@
 class User < ActiveRecord::Base
 end
 
-# has_many relation
-class Listing < ActiveRecord::Base
-  has_many :comments, :dependent => :destroy
-  has_many :albums, :dependent => :destroy
-  has_many :images, :through => :albums
+# Models
+class Location < ActiveRecord::Base
+  has_many      :listings
+
   track_history
 end
 
-class Comment < ActiveRecord::Base
-  belongs_to :listing
-  track_history scope: :listing
-end
-
-# :class_name options
-class ListingClassName < ActiveRecord::Base
-  self.table_name = :listings
-  track_history class_name: 'ListingHistory'
-end
-
-# :only options
-class ListingOnly < ActiveRecord::Base
-  self.table_name = :listings
-  track_history only: [:name]
-end
-
-# :except options
-class ListingExcept < ActiveRecord::Base
-  self.table_name = :listings
-  track_history except: [:name]
-end
-
-class ListingExceptAll < ActiveRecord::Base
-  self.table_name = :listings
-  track_history except: [:name, :description, :view_count, :is_active, :location_id]
-end
-
-# :create callback
-class ListingOnCreate < ActiveRecord::Base
-  self.table_name = :listings
-  track_history on: [:create]
-end
-
-# :update callback
-class ListingOnUpdate < ActiveRecord::Base
-  self.table_name = :listings
-  track_history on: [:update]
-end
-
-# :destroy callback
-class ListingOnDestroy < ActiveRecord::Base
-  self.table_name = :listings
-  track_history on: [:destroy]
-end
-
-# no callback
-class ListingNoCallback < ActiveRecord::Base
-  self.table_name = :listings
-  track_history on: []
-end
-
-# custom changes
-class ListingWithChanges < ActiveRecord::Base
-  self.table_name = :listings
+class Listing < ActiveRecord::Base
   belongs_to    :location
-  track_history changeset: :history_tracker_changeset
+  has_many      :albums
+  has_many      :photos, through: :albums
 
-  private
-  def history_tracker_changeset(method)
-    changeset = changes.except(*non_tracked_columns)
-    if location_id_changed?    
-      changeset['location'] = [location_was.try(:name), location.name]
-      changeset.delete('location_id')
-    end
-
-    changeset
-  end
+  track_history except: :view_count,
+                changes_method: :history_changes
 
   def location_was
-    if location_id_was.present?
-      Location.find(location_id_was)
+    Location.where(id: location_id_was).first
+  end
+
+  def location_changed?
+    location_id_changed?
+  end
+
+  def history_changes
+    if location_changed?
+      changes.merge(location: [location_was.try(:name), location.try(:name)])
+    elsif changes.blank?
+      changes.merge(location: [location.try(:name), nil])
     else
-      nil
+      changes
     end
   end
 end
 
-# :include options
-class Location < ActiveRecord::Base
-  self.table_name = :locations
-end
-
-class ListingInclude < ActiveRecord::Base
-  self.table_name = :listings
-  belongs_to :location
-  track_history include: [:location]
-end
-
-class ListingIncludeFields < ActiveRecord::Base
-  self.table_name = :listings
-  belongs_to :location
-  track_history include: [{:location => [:name]}]
-end
-
-# nested relation
 class Album < ActiveRecord::Base
-  belongs_to :listing
-  has_many :images
-  track_history scope: :listing
+  belongs_to    :listing
+  has_many      :photos
+
+  track_history only: :name,
+                parent: :listing,
+                inverse_of: :albums,
+                class_name: 'ListingHistoryTracker'
 end
 
-class Image < ActiveRecord::Base
-  belongs_to :album
+class Photo < ActiveRecord::Base
+  belongs_to    :album
 
-  track_history scope: :listing,
-    class_name: 'Listing::History',
-    association_chain: lambda { |record|
-      [ {id: record.album.listing.id, name: 'Listing'}, {id: record.album.id, name: 'albums'}, {id: record.id, name: 'images'} ]
-    }
+  track_history parent: :album,
+                inverse_of: :photos,
+                class_name: 'ListingHistoryTracker'
 end

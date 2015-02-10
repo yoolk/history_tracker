@@ -1,9 +1,15 @@
 source 'https://rubygems.org'
 
-gem 'activerecord', '~> 4.0.2', require: 'active_record'
-gem "mongoid", "~> 4.0"
+gem 'activerecord', '~> 4.0.13',   require: 'active_record'
+gem 'mongoid',      '~> 4.0.0',   require: 'mongoid'
+gem 'pry'
+gem 'sqlite3'
+gem 'rake'
+gem 'rspec',            '~> 3.2'
+gem 'guard-rspec',      '~> 4.5'
+gem 'mongoid-rspec',    '~> 2.0'
+gem 'simplecov',        '~> 0.9'
+gem 'coveralls',        '~> 0.7'
+gem 'database_cleaner', '~> 1.4.0'
 
-gem "codeclimate-test-reporter", group: :test, require: nil
-gem "coveralls", require: false
-
-gemspec :path => '../'
+gemspec path: '../'
