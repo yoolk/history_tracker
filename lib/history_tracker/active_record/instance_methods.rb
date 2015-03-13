@@ -31,7 +31,7 @@ module HistoryTracker
             @association_chain = history_options[:association_chain].call(self)
           elsif self.class.reflect_on_association(history_scope)
             main = send(history_scope)
-            reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
+            reflection = main.class.reflections.find { |name, reflection| reflection.klass == self.class }[1]
             @association_chain = case reflection.macro
             when :belongs_to, :has_one, :has_many
               [ { id: main.id, name: main.class.name.gsub(/^Yoolk::/, "") }, { id: id, name: reflection.name.to_s } ]
@@ -255,7 +255,7 @@ module HistoryTracker
 
       def multi_association_chains
         main = send(history_options[:scope])
-        reflection = main.reflections.find { |name, reflection| reflection.klass == self.class }[1]
+        reflection = main.class.reflections.find { |name, reflection| reflection.klass == self.class }[1]
         association_chain = case reflection.macro
         when :belongs_to, :has_one, :has_many
           { 'association_chain.id' => id, 'association_chain.name' => reflection.name.to_s }
