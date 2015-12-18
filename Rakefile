@@ -9,7 +9,7 @@ end
 task :default => "spec:all"
 
 namespace :spec do
-  %w(active_record_40 active_record_32).each do |gemfile|
+  %w(active_record_42 active_record_40 active_record_32).each do |gemfile|
     desc "Run Tests against #{gemfile}"
     task gemfile do
       sh "BUNDLE_GEMFILE='gemfiles/#{gemfile}.gemfile' bundle --quiet"
@@ -19,7 +19,7 @@ namespace :spec do
 
   desc "Run Tests against active_record versions"
   task :all do
-    %w(active_record_40 active_record_32).each do |gemfile|
+    %w(active_record_42 active_record_40 active_record_32).each do |gemfile|
       sh "BUNDLE_GEMFILE='gemfiles/#{gemfile}.gemfile' bundle --quiet"
       sh "BUNDLE_GEMFILE='gemfiles/#{gemfile}.gemfile' bundle exec rake spec"
     end

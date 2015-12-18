@@ -6,9 +6,9 @@ describe "Nested Association" do
   let!(:image) { album.images.create!(caption: 'Product A') }
 
   context "scope" do
-    it { expect(listing.history_tracks.count).to eq(1) }  
-    it { expect(listing.history_tracks(scope: false).count).to eq(1) }  
-    it { expect(listing.history_tracks(scope: true).count).to eq(3) }  
+    it { expect(listing.history_tracks.count).to eq(1) }
+    it { expect(listing.history_tracks(scope: false).count).to eq(1) }
+    it { expect(listing.history_tracks(scope: true).count).to eq(3) }
   end
 
   context "association" do
